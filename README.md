@@ -6,7 +6,7 @@
 ## 🚀 技術スタック
 
 - **フロントエンド:** [Nuxt.js 3](https://nuxt.com/)
-- **バックエンド:** Node.js (Express)
+- **バックエンド:** Node.js ver18 系(Express)
 - **データベース:** (未定) ※今後選定予定
 - **スタイリング:** Tailwind CSS
 - **言語:** TypeScript
