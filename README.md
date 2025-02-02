@@ -8,7 +8,7 @@
 - **フロントエンド:** [Nuxt.js 3](https://nuxt.com/)
 - **バックエンド:** Node.js ver18 系(Express)
 - **データベース:** (未定) ※今後選定予定
-- **スタイリング:** Tailwind CSS
+- **スタイリング:** Tailwind CSS ver4.00 [導入手順](https://tailwindcss.com/docs/installation/framework-guides/nuxt)
 - **言語:** TypeScript
 
 ## 📌 機能（予定）
