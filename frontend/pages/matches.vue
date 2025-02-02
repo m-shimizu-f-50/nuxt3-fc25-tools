@@ -67,7 +67,6 @@ const computeRank = (win: number): number | string => {
 				<tr>
 					<th class="py-3 px-6 text-left">対戦日時</th>
 					<th class="py-3 px-6 text-center">勝敗 (15試合)</th>
-					<th class="py-3 px-6 text-center">勝率</th>
 					<th class="py-3 px-6 text-center">得点</th>
 					<th class="py-3 px-6 text-center">得点者</th>
 					<th class="py-3 px-6 text-center">MVP</th>
@@ -85,7 +84,6 @@ const computeRank = (win: number): number | string => {
 							}})
 						</div>
 					</td>
-					<td class="py-3 px-6 text-center font-bold"></td>
 					<td class="py-3 px-6 text-center">{{ match.goals }}</td>
 					<td class="py-3 px-6 text-center">{{ match.scorers }}</td>
 					<td class="py-3 px-6 text-center font-bold text-blue-500">
