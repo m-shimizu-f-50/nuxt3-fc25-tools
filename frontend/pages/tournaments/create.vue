@@ -23,9 +23,119 @@ today.setHours(0, 0, 0, 0);
 const formData = ref<FormData>({
 	name: '',
 	startDate: null,
-	players: [],
+	players: [
+		{
+			name: '',
+			position: 'FW',
+			team: '',
+			isStarter: true,
+		},
+		{
+			name: '',
+			position: 'FW',
+			team: '',
+			isStarter: true,
+		},
+		{
+			name: '',
+			position: 'FW',
+			team: '',
+			isStarter: true,
+		},
+		{
+			name: '',
+			position: 'MF',
+			team: '',
+			isStarter: true,
+		},
+		{
+			name: '',
+			position: 'MF',
+			team: '',
+			isStarter: true,
+		},
+		{
+			name: '',
+			position: 'MF',
+			team: '',
+			isStarter: true,
+		},
+		{
+			name: '',
+			position: 'DF',
+			team: '',
+			isStarter: true,
+		},
+		{
+			name: '',
+			position: 'DF',
+			team: '',
+			isStarter: true,
+		},
+		{
+			name: '',
+			position: 'DF',
+			team: '',
+			isStarter: true,
+		},
+		{
+			name: '',
+			position: 'DF',
+			team: '',
+			isStarter: true,
+		},
+		{
+			name: '',
+			position: 'GK',
+			team: '',
+			isStarter: true,
+		},
+		{
+			name: '',
+			position: 'FW',
+			team: '',
+			isStarter: false,
+		},
+		{
+			name: '',
+			position: 'FW',
+			team: '',
+			isStarter: false,
+		},
+		{
+			name: '',
+			position: 'FW',
+			team: '',
+			isStarter: false,
+		},
+		{
+			name: '',
+			position: 'FW',
+			team: '',
+			isStarter: false,
+		},
+		{
+			name: '',
+			position: 'FW',
+			team: '',
+			isStarter: false,
+		},
+		{
+			name: '',
+			position: 'FW',
+			team: '',
+			isStarter: false,
+		},
+		{
+			name: '',
+			position: 'FW',
+			team: '',
+			isStarter: false,
+		},
+	],
 });
 
+// 選手追加
 const addPlayer = () => {
 	formData.value.players.push({
 		name: '',
@@ -35,10 +145,35 @@ const addPlayer = () => {
 	});
 };
 
+// 選手削除
 const removePlayer = (index: number) => {
 	formData.value.players.splice(index, 1);
 };
 
+// 選手整頓
+const arrangementPlayer = () => {
+	if (formData.value.players.length <= 1) return;
+
+	// ポジションの優先順位を定義（FWが最優先、GKが最も後ろ）
+	const positionOrder = { FW: 1, MF: 2, DF: 3, GK: 4 };
+
+	formData.value.players = formData.value.players.sort((a, b) => {
+		// ① スタメン優先
+		// isStarter は boolean なので、Number() で 0 or 1 に変換して比較
+		// b.isStarter = true (1), a.isStarter = false (0) の場合 1 - 0 = 1 → b を前に
+		const starterComparison = Number(b.isStarter) - Number(a.isStarter);
+
+		// スタメンとベンチが異なる場合は、ここでソート決定（true が前）
+		if (starterComparison !== 0) return starterComparison;
+
+		// ② ポジション順（FW > MF > DF > GK）
+		// positionOrder で定義した数値を比較し、優先順位の低い方を後ろにする
+		// 例: FW(1) - MF(2) = -1 → FW が前に
+		return positionOrder[a.position] - positionOrder[b.position];
+	});
+};
+
+// 登録ボタン
 const handleSubmit = async () => {
 	try {
 		if (!formData.value.startDate) {
@@ -117,8 +252,8 @@ const handleSubmit = async () => {
 									v-model="player.isStarter"
 									class="block w-full bg-white p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 								>
-									<option value="true">スタメン</option>
-									<option value="false">ベンチ</option>
+									<option :value="true">スタメン</option>
+									<option :value="false">ベンチ</option>
 								</select>
 							</div>
 							<div class="flex-1">
@@ -143,9 +278,17 @@ const handleSubmit = async () => {
 					<button
 						type="button"
 						@click="addPlayer"
-						class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+						class="mt-4 mr-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+						:disabled="formData.players.length >= 18"
 					>
 						選手を追加
+					</button>
+					<button
+						type="button"
+						@click="arrangementPlayer"
+						class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+					>
+						選手を整頓
 					</button>
 				</div>
 
@@ -153,7 +296,7 @@ const handleSubmit = async () => {
 				<div class="flex justify-end">
 					<button
 						type="submit"
-						class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+						class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
 					>
 						登録する
 					</button>
