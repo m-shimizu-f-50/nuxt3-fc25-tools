@@ -62,6 +62,14 @@ const computeRank = (win: number): number | string => {
 <template>
 	<div class="container mx-auto p-4">
 		<h1 class="text-2xl font-bold mb-4">CF 対戦データ</h1>
+		<div class="flex justify-end mb-4">
+			<button
+				class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+				@click="$router.push('/tournaments/create')"
+			>
+				大会登録
+			</button>
+		</div>
 		<table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
 			<thead class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
 				<tr>
