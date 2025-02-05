@@ -9,11 +9,13 @@
 - **バックエンド:** Node.js ver18 系(Express)
 - **データベース:** (未定) ※今後選定予定
 - **スタイリング:** Tailwind CSS ver4.00 [導入手順](https://tailwindcss.com/docs/installation/framework-guides/nuxt)
+  カラー：https://tailwindcss.com/docs/colors
 - **言語:** TypeScript
 
 ## ライブラリ
 
 - **アイコン:** @iconify/vue
+- **カレンダー:** @vuepic/vue-datepicker
 
 ## 📌 機能（予定）
 
