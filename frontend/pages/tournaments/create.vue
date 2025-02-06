@@ -215,7 +215,7 @@ const removePlayer = (index: number) => {
 // 選手整頓
 const arrangementPlayer = () => {
 	if (players.value.length <= 1) return;
-
+	console.log('整頓前:', players.value);
 	// ポジションの優先順位を定義（FWが最優先、GKが最も後ろ）
 	const positionOrder = { FW: 1, MF: 2, DF: 3, GK: 4 };
 
@@ -225,15 +225,23 @@ const arrangementPlayer = () => {
 		const playerA = a.value as Player;
 		const playerB = b.value as Player;
 
+		// `positionOrder` のキーが存在するか確認
+		const posA = positionOrder[playerA.position] ?? Number.MAX_SAFE_INTEGER;
+		const posB = positionOrder[playerB.position] ?? Number.MAX_SAFE_INTEGER;
+
 		// ① スタメン優先（true が前）
 		const starterComparison =
 			Number(playerB.isStarter) - Number(playerA.isStarter);
 		if (starterComparison !== 0) return starterComparison;
 
 		// ② ポジション順（FW > MF > DF > GK）
-		return positionOrder[playerA.position] - positionOrder[playerB.position];
+		return posA - posB;
 	});
 
+	// 整頓後のログを出力
+	console.log('整頓後:', JSON.stringify(sortedPlayers, null, 2));
+
+	// `splice()` の代わりに直接代入（Vue の reactivity に確実に反映させる）
 	// `splice()` を使ってリアクティブな配列を更新
 	players.value.splice(0, players.value.length, ...sortedPlayers);
 
