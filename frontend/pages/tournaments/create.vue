@@ -238,27 +238,23 @@ const arrangementPlayer = () => {
 		return posA - posB;
 	});
 
+	// 一度配列を空にする
+	while (players.value.length) {
+		remove(0);
+	}
+
+	// ソートされた選手を順番に追加
+	sortedPlayers.forEach((player) => {
+		push({
+			name: player.value.name,
+			position: player.value.position,
+			team: player.value.team,
+			isStarter: player.value.isStarter,
+		});
+	});
+
 	// 整頓後のログを出力
 	console.log('整頓後:', JSON.stringify(sortedPlayers, null, 2));
-
-	// `splice()` の代わりに直接代入（Vue の reactivity に確実に反映させる）
-	// `splice()` を使ってリアクティブな配列を更新
-	players.value.splice(0, players.value.length, ...sortedPlayers);
-
-	// players.value.sort((a, b) => {
-	// 	// ① スタメン優先
-	// 	// isStarter は boolean なので、Number() で 0 or 1 に変換して比較
-	// 	// b.isStarter = true (1), a.isStarter = false (0) の場合 1 - 0 = 1 → b を前に
-	// 	const starterComparison = Number(b.isStarter) - Number(a.isStarter);
-
-	// 	// スタメンとベンチが異なる場合は、ここでソート決定（true が前）
-	// 	if (starterComparison !== 0) return starterComparison;
-
-	// 	// ② ポジション順（FW > MF > DF > GK）
-	// 	// positionOrder で定義した数値を比較し、優先順位の低い方を後ろにする
-	// 	// 例: FW(1) - MF(2) = -1 → FW が前に
-	// 	return positionOrder[a.position] - positionOrder[b.position];
-	// });
 };
 
 // 登録ボタン
