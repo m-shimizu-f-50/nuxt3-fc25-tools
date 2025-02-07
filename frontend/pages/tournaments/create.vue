@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import Datepicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 import { useForm, useField, useFieldArray } from 'vee-validate';
@@ -23,10 +23,10 @@ today.setHours(0, 0, 0, 0);
 
 // バリデーションスキーマの定義
 const validationSchema = yup.object({
-	startDate: yup.date().required('開始日を選択してください'),
+	// 開始日(startDate)のバリデーションもカスタムチェックで対応
 	players: yup.array().of(
 		yup.object({
-			name: yup.string().required('選手名を入力してください'),
+			// nameのバリデーションはカスタムチェックで対応
 			position: yup
 				.string()
 				.oneOf(['GK', 'DF', 'MF', 'FW'], '無効なポジションです'),
@@ -37,7 +37,7 @@ const validationSchema = yup.object({
 });
 
 // `useForm` でバリデーション付きのフォームを作成
-const { handleSubmit, errors } = useForm({
+const { handleSubmit, errors, validateField } = useForm({
 	validationSchema,
 	initialValues: {
 		startDate: null,
@@ -195,27 +195,16 @@ const addPlayer = () => {
 	if (players.value.length >= 18) return;
 	push({ name: '', position: 'FW', team: '', isStarter: false });
 };
-// const addPlayer = () => {
-// 	formData.value.players.push({
-// 		name: '',
-// 		position: 'FW',
-// 		team: '',
-// 		isStarter: true,
-// 	});
-// };
 
 // 選手削除
 const removePlayer = (index: number) => {
 	remove(index);
 };
-// const removePlayer = (index: number) => {
-// 	formData.value.players.splice(index, 1);
-// };
 
 // 選手整頓
 const arrangementPlayer = () => {
 	if (players.value.length <= 1) return;
-	console.log('整頓前:', players.value);
+
 	// ポジションの優先順位を定義（FWが最優先、GKが最も後ろ）
 	const positionOrder = { FW: 1, MF: 2, DF: 3, GK: 4 };
 
@@ -252,33 +241,68 @@ const arrangementPlayer = () => {
 			isStarter: player.value.isStarter,
 		});
 	});
-
-	// 整頓後のログを出力
-	console.log('整頓後:', JSON.stringify(sortedPlayers, null, 2));
 };
 
-// 登録ボタン
-// const handleSubmit = async () => {
-// 	try {
-// 		if (!formData.value.startDate) {
-// 			alert('開始日を選択してください');
-// 			return;
-// 		}
+// フォームエラー管理用の ref を修正
+const formErrors = ref<{
+	startDate?: string;
+	players: string[]; // playersを必須のプロパティとして定義
+}>({
+	players: [], // 初期値として空配列を設定
+});
 
-// 		const submitData = {
-// 			...formData.value,
-// 			startDate: formData.value.startDate.toISOString().split('T')[0],
-// 		};
-
-// 		// TODO: APIリクエストの実装
-// 		console.log('送信データ:', submitData);
-// 		// 成功時の処理（例：一覧ページへの遷移）
-// 	} catch (error) {
-// 		console.error('エラー:', error);
-// 	}
-// };
 // 送信ボタン
 const submitForm = handleSubmit((values) => {
+	// エラーをリセット
+	formErrors.value = {
+		players: [], // ここで配列を初期化
+	};
+
+	// 開始日のバリデーション
+	if (!startDateModel.value) {
+		formErrors.value.startDate = '開始日を選択してください';
+	}
+
+	// 選手名のバリデーション
+	const emptyNamePlayers = players.value.filter(
+		(player) => !player.value.name.trim()
+	);
+	if (emptyNamePlayers.length > 0) {
+		formErrors.value.players.push('選手名の値を入力してください');
+	}
+
+	// 選手名の重複チェック
+	const playerNames = players.value
+		.map((player) => player.value.name.trim())
+		.filter((name) => name !== '');
+	const duplicateNames = playerNames.filter(
+		(name, index) => playerNames.indexOf(name) !== index
+	);
+
+	if (duplicateNames.length > 0) {
+		formErrors.value.players.push(
+			`以下の選手名が重複しています：${Array.from(new Set(duplicateNames)).join(
+				', '
+			)}`
+		);
+	}
+
+	// 選手人数のバリデーション（18人）
+	const filledPlayers = players.value.filter((player) =>
+		player.value.name.trim()
+	);
+	if (filledPlayers.length !== 18) {
+		formErrors.value.players?.push(
+			`選手は18人登録してください（現在：${filledPlayers.length}人）`
+		);
+	}
+
+	// エラーがある場合は送信しない
+	if (formErrors.value.startDate || formErrors.value.players.length > 0) {
+		console.log('エラーがあるため送信できません');
+		return;
+	}
+
 	console.log('送信データ:', values);
 });
 </script>
@@ -302,8 +326,8 @@ const submitForm = handleSubmit((values) => {
 							placeholder="日付を選択"
 							input-class-name="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 						/>
-						<p class="text-red-500 text-sm" v-if="errors.startDate">
-							{{ errors.startDate }}
+						<p class="text-red-500 text-sm" v-if="formErrors.startDate">
+							{{ formErrors.startDate }}
 						</p>
 					</div>
 				</div>
@@ -326,12 +350,6 @@ const submitForm = handleSubmit((values) => {
 									placeholder="選手名"
 									class="block w-full bg-white p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 								/>
-								<p
-									class="text-red-500 text-sm"
-									v-if="errors[`players.${index}.name`]"
-								>
-									{{ errors[`players.${index}.name`] }}
-								</p>
 							</div>
 							<div class="w-32">
 								<select
@@ -360,12 +378,6 @@ const submitForm = handleSubmit((values) => {
 									placeholder="所属チーム"
 									class="block bg-white p-2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 								/>
-								<p
-									class="text-red-500 text-sm"
-									v-if="errors[`players.${index}.team`]"
-								>
-									{{ errors[`players.${index}.team`] }}
-								</p>
 							</div>
 							<div class="w-24">
 								<button
@@ -378,6 +390,17 @@ const submitForm = handleSubmit((values) => {
 							</div>
 						</div>
 					</div>
+					<!-- 選手一覧のエラーメッセージ -->
+					<div v-if="formErrors.players?.length" class="mt-2">
+						<p
+							v-for="(error, index) in formErrors.players"
+							:key="index"
+							class="text-sm text-red-600"
+						>
+							{{ error }}
+						</p>
+					</div>
+
 					<button
 						type="button"
 						@click="addPlayer"
