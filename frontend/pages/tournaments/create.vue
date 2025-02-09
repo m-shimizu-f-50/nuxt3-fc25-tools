@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import Datepicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 import { useForm, useField, useFieldArray } from 'vee-validate';
 import * as yup from 'yup';
+import axios from 'axios';
 
 interface Player {
 	name: string;
@@ -243,6 +244,16 @@ const arrangementPlayer = () => {
 	});
 };
 
+// 日付データをフォーマット
+const formatDate = (isoDate: Date | null) => {
+	if (!isoDate) return '';
+	const dateObj = new Date(isoDate);
+	const year = dateObj.getUTCFullYear();
+	const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+	const day = String(dateObj.getUTCDate()).padStart(2, '0');
+	return `${year}-${month}-${day}`;
+};
+
 // フォームエラー管理用の ref を修正
 const formErrors = ref<{
 	startDate?: string;
@@ -252,7 +263,7 @@ const formErrors = ref<{
 });
 
 // 送信ボタン
-const submitForm = handleSubmit((values) => {
+const submitForm = handleSubmit(async (values) => {
 	// エラーをリセット
 	formErrors.value = {
 		players: [], // ここで配列を初期化
@@ -303,7 +314,23 @@ const submitForm = handleSubmit((values) => {
 		return;
 	}
 
-	console.log('送信データ:', values);
+	try {
+		const formattedStartDate = formatDate(startDateModel.value);
+		const response = await axios.post('http://localhost:8890/api/tournaments', {
+			startDate: formattedStartDate,
+			players: players.value.map((player) => ({
+				name: player.value.name,
+				position: player.value.position,
+				team: player.value.team,
+				isStarter: player.value.isStarter,
+			})),
+		});
+		console.log('登録成功:', response.data);
+		// 成功時の処理（例：一覧ページへの遷移）
+	} catch (error) {
+		console.error('登録エラー:', error);
+		// エラー時の処理
+	}
 });
 </script>
 

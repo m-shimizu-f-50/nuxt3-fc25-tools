@@ -1,9 +1,20 @@
 require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
+const cors = require('cors');
+const tournamentsRouter = require('./routes/tournaments');
 
 const app = express();
 const port = 8890;
+
+// CORSの設定
+app.use(
+	cors({
+		origin: 'http://localhost:3000', // フロントエンドのオリジンを指定
+		methods: ['GET', 'POST', 'PUT', 'DELETE'], // 許可するHTTPメソッド
+		credentials: true, // クッキーを含むリクエストを許可する場合
+	})
+);
 
 // MySQLデータベース接続の設定
 const db = mysql.createConnection({
@@ -26,10 +37,8 @@ db.connect((err) => {
 // JSONリクエストボディのパース
 app.use(express.json());
 
-// サンプルルート
-app.get('/', (req, res) => {
-	res.send('Hello, World!');
-});
+// 大会ルート
+app.use('/api/tournaments', tournamentsRouter);
 
 // ユーザー一覧を取得するルート
 // app.get('/users', (req, res) => {
