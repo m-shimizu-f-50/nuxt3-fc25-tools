@@ -6,6 +6,7 @@ const db = require('../db'); // データベース接続を管理するモジュ
 router.post('/', (req, res) => {
 	const { startDate, players } = req.body;
 
+	// バリデーション
 	if (!startDate || !players || players.length !== 18) {
 		return res.status(400).json({ error: '必要なフィールドが不足しています' });
 	}
