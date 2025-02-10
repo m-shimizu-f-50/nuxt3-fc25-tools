@@ -40,19 +40,6 @@ app.use(express.json());
 // 大会ルート
 app.use('/api/tournaments', tournamentsRouter);
 
-// ユーザー一覧を取得するルート
-// app.get('/users', (req, res) => {
-// 	const query = 'SELECT * FROM users';
-// 	db.query(query, (err, results) => {
-// 		if (err) {
-// 			console.error('データ取得エラー:', err);
-// 			res.status(500).send('サーバーエラー');
-// 			return;
-// 		}
-// 		res.json(results);
-// 	});
-// });
-
 // サーバーの起動
 app.listen(port, () => {
 	console.log(`サーバーがポート${port}で起動しました`);
