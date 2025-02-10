@@ -2,8 +2,71 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db'); // データベース接続を管理するモジュール
 
-// 新しい大会と選手を登録するエンドポイント
-router.post('/', (req, res) => {
+// 大会一覧を取得
+router.get('/', (req, res) => {
+	// 暫定のクエリ
+	const query = `
+    SELECT
+      t.id AS tournament_id,
+      t.start_date,
+      t.wins,
+      t.losses,
+      p.id AS player_id,
+      p.name AS player_name,
+      SUM(p.total_goals) AS total_goals,
+      mvp.name AS mvp_name
+    FROM
+      tournaments t
+    LEFT JOIN
+      players p ON p.tournament_id = t.id
+    LEFT JOIN
+      players mvp ON t.mvp_player_id = mvp.id
+    GROUP BY
+      t.id, p.id, mvp.id
+    ORDER BY
+      t.id, p.total_goals DESC;
+  `;
+
+	db.query(query, (err, results) => {
+		if (err) {
+			console.error('大会一覧取得エラー:', err);
+			return res.status(500).json({ error: '大会一覧取得エラー' });
+		}
+		// 大会ごとに選手をリスト化
+		const tournaments = {};
+		results.forEach((row) => {
+			if (!tournaments[row.tournament_id]) {
+				tournaments[row.tournament_id] = {
+					start_date: row.start_date,
+					wins: row.wins,
+					losses: row.losses,
+					mvp_name: row.mvp_name,
+					players: [],
+				};
+			}
+			tournaments[row.tournament_id].players.push({
+				player_id: row.player_id,
+				player_name: row.player_name,
+				total_goals: Number(row.total_goals),
+			});
+		});
+
+		// オブジェクトを配列に変換
+		const tournamentList = Object.keys(tournaments).map((id) => ({
+			tournament_id: id,
+			start_date: tournaments[id].start_date,
+			wins: tournaments[id].wins,
+			losses: tournaments[id].losses,
+			mvp_name: tournaments[id].mvp_name,
+			players: tournaments[id].players,
+		}));
+
+		res.status(200).json(tournamentList);
+	});
+});
+
+// 新しい大会を登録
+router.post('/create', (req, res) => {
 	const { startDate, players } = req.body;
 
 	// バリデーション

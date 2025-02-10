@@ -1,5 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+
+const tournaments = ref([]);
+
+// 大会一覧を取得する関数
+const fetchTournaments = async () => {
+	try {
+		const response = await fetch('http://localhost:8890/api/tournaments');
+		const data = await response.json();
+		tournaments.value = data;
+		console.log('大会一覧:', tournaments.value);
+	} catch (error) {
+		console.error('大会一覧取得エラー:', error);
+	}
+};
+
+onMounted(() => {
+	fetchTournaments();
+});
 
 const matches = ref([
 	{
