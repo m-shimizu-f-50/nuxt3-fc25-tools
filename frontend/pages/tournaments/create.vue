@@ -316,15 +316,18 @@ const submitForm = handleSubmit(async (values) => {
 
 	try {
 		const formattedStartDate = formatDate(startDateModel.value);
-		const response = await axios.post('http://localhost:8890/api/tournaments', {
-			startDate: formattedStartDate,
-			players: players.value.map((player) => ({
-				name: player.value.name,
-				position: player.value.position,
-				team: player.value.team,
-				isStarter: player.value.isStarter,
-			})),
-		});
+		const response = await axios.post(
+			'http://localhost:8890/api/tournaments/create',
+			{
+				startDate: formattedStartDate,
+				players: players.value.map((player) => ({
+					name: player.value.name,
+					position: player.value.position,
+					team: player.value.team,
+					isStarter: player.value.isStarter,
+				})),
+			}
+		);
 		console.log('登録成功:', response.data);
 		// 成功時の処理（例：一覧ページへの遷移）
 	} catch (error) {
