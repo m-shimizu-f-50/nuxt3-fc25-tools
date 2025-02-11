@@ -1,8 +1,22 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { API_ENDPOINTS } from '~/constants/api';
+import { formatDate } from '~/utils/date';
 
-const tournaments = ref([]);
+interface Tournament {
+	tournamentId: number;
+	startDate: string;
+	wins: number;
+	losses: number;
+	mvpName: string;
+	players: {
+		playerId: number;
+		playerName: string;
+		totalGoals: number;
+	}[];
+}
+
+const tournaments = ref<Tournament[]>([]);
 
 // 大会一覧を取得する関数
 const fetchTournaments = async () => {
@@ -19,29 +33,6 @@ const fetchTournaments = async () => {
 onMounted(() => {
 	fetchTournaments();
 });
-
-const matches = ref([
-	{
-		id: 1,
-		date: '2025-02-03',
-		win: 10,
-		lose: 5,
-		goals: 23,
-		scorers: 'Player A (10), Player B (5), Player C (3)',
-		mvp: 'Player A',
-		rank: 'Gold',
-	},
-	{
-		id: 2,
-		date: '2025-02-10',
-		win: 3,
-		lose: 7,
-		goals: 18,
-		scorers: 'Player D (6), Player E (5), Player F (4)',
-		mvp: 'Player D',
-		rank: 'Silver',
-	},
-]);
 
 // 勝率を計算する関数
 const computeWinRate = (win: number, lose: number): string => {
@@ -76,6 +67,18 @@ const computeRank = (win: number): number | string => {
 			return '-'; // こちらの処理は入らない想定
 	}
 };
+
+// 得点者の名前をフォーマットする関数
+const formatScorersList = (
+	players: { playerName: string; totalGoals: number }[]
+) => {
+	const scorers = players
+		.filter((player) => player.totalGoals > 0)
+		.map((player) => `${player.playerName} (${player.totalGoals})`)
+		.join(', ');
+
+	return scorers || '-';
+};
 </script>
 
 <template>
@@ -86,48 +89,74 @@ const computeRank = (win: number): number | string => {
 				class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
 				@click="$router.push('/tournaments/create')"
 			>
-				大会登録
+				新規登録
 			</button>
 		</div>
-		<table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-			<thead class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-				<tr>
-					<th class="py-3 px-6 text-left">対戦日時</th>
-					<th class="py-3 px-6 text-center">勝敗 (15試合)</th>
-					<th class="py-3 px-6 text-center">得点</th>
-					<th class="py-3 px-6 text-center">得点者</th>
-					<th class="py-3 px-6 text-center">MVP</th>
-					<th class="py-3 px-6 text-center">ランク</th>
-					<th class="py-3 px-6 text-center">詳細</th>
-				</tr>
-			</thead>
-			<tbody class="text-gray-700">
-				<tr v-for="match in matches" :key="match.id" class="border-b">
-					<td class="py-3 px-6">{{ match.date }}</td>
-					<td class="py-3 px-6 text-center">
-						<div class="flex justify-center">
-							{{ match.win }}勝 / {{ match.lose }}敗 ({{
-								computeWinRate(match.win, match.lose)
-							}})
-						</div>
-					</td>
-					<td class="py-3 px-6 text-center">{{ match.goals }}</td>
-					<td class="py-3 px-6 text-center">{{ match.scorers }}</td>
-					<td class="py-3 px-6 text-center font-bold text-blue-500">
-						{{ match.mvp }}
-					</td>
-					<td class="py-3 px-6 text-center font-bold">
-						Rank {{ computeRank(match.win) }}
-					</td>
-					<td class="py-3 px-6 text-center">
-						<button
-							class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-						>
-							詳細
-						</button>
-					</td>
-				</tr>
-			</tbody>
-		</table>
+
+		<!-- ローディング表示 -->
+		<div v-if="!tournaments.length" class="text-center py-12">
+			<div class="text-gray-500">データを読み込み中...</div>
+		</div>
+		<div v-else>
+			<table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+				<thead
+					class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal"
+				>
+					<tr>
+						<th class="py-3 px-6 text-left">対戦日時</th>
+						<th class="py-3 px-6 text-center">勝敗 (15試合)</th>
+						<th class="py-3 px-6 text-center">総得点</th>
+						<th class="py-3 px-6 text-center">得点者</th>
+						<th class="py-3 px-6 text-center">MVP</th>
+						<th class="py-3 px-6 text-center">ランク</th>
+						<th class="py-3 px-6 text-center">詳細</th>
+					</tr>
+				</thead>
+				<tbody class="text-gray-700">
+					<tr
+						v-for="tournament in tournaments"
+						:key="tournament.tournamentId"
+						class="border-b"
+					>
+						<td class="py-3 px-6">{{ formatDate(tournament.startDate) }}</td>
+						<td class="py-3 px-6 text-center">
+							<div class="flex justify-center">
+								{{ tournament.wins }}勝 / {{ tournament.losses }}敗 ({{
+									computeWinRate(tournament.wins, tournament.losses)
+								}})
+							</div>
+						</td>
+						<td class="py-3 px-6 text-center">
+							{{
+								tournament.players.reduce(
+									(acc, player) => acc + player.totalGoals,
+									0
+								)
+							}}
+						</td>
+						<td class="py-3 px-6 text-center">
+							{{ formatScorersList(tournament.players) }}
+						</td>
+						<td class="py-3 px-6 text-center font-bold text-blue-500">
+							{{ tournament.mvpName ?? '-' }}
+						</td>
+						<td class="py-3 px-6 text-center font-bold">
+							{{
+								tournament.wins === 0 && tournament.wins === 0
+									? `-`
+									: `Rank ${computeRank(tournament.wins)}`
+							}}
+						</td>
+						<td class="py-3 px-6 text-center">
+							<button
+								class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+							>
+								詳細
+							</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	</div>
 </template>

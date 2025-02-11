@@ -37,27 +37,27 @@ router.get('/', (req, res) => {
 		results.forEach((row) => {
 			if (!tournaments[row.tournament_id]) {
 				tournaments[row.tournament_id] = {
-					start_date: row.start_date,
+					startDate: row.start_date,
 					wins: row.wins,
 					losses: row.losses,
-					mvp_name: row.mvp_name,
+					mvpName: row.mvp_name,
 					players: [],
 				};
 			}
 			tournaments[row.tournament_id].players.push({
-				player_id: row.player_id,
-				player_name: row.player_name,
-				total_goals: Number(row.total_goals),
+				playerId: Number(row.player_id),
+				playerName: row.player_name,
+				totalGoals: Number(row.total_goals),
 			});
 		});
 
 		// オブジェクトを配列に変換
 		const tournamentList = Object.keys(tournaments).map((id) => ({
-			tournament_id: id,
-			start_date: tournaments[id].start_date,
+			tournamentId: Number(id),
+			startDate: tournaments[id].startDate,
 			wins: tournaments[id].wins,
 			losses: tournaments[id].losses,
-			mvp_name: tournaments[id].mvp_name,
+			mvpName: tournaments[id].mvpName,
 			players: tournaments[id].players,
 		}));
 
