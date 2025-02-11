@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { API_ENDPOINTS } from '~/constants/api';
 
 const tournaments = ref([]);
 
 // 大会一覧を取得する関数
 const fetchTournaments = async () => {
 	try {
-		const response = await fetch('http://localhost:8890/api/tournaments');
+		const response = await fetch(API_ENDPOINTS.TOURNAMENTS.LIST);
 		const data = await response.json();
 		tournaments.value = data;
 		console.log('大会一覧:', tournaments.value);
