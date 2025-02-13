@@ -5,7 +5,7 @@
 			<nav>
 				<ul class="flex">
 					<li>
-						<NuxtLink to="/matches" class="p-5 hover:bg-gray-400 transition"
+						<NuxtLink to="/tournaments" class="p-5 hover:bg-gray-400 transition"
 							>CF対戦データ</NuxtLink
 						>
 					</li>
