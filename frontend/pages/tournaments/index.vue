@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { API_ENDPOINTS } from '~/constants/api';
 import { formatDate } from '~/utils/date';
+import type { Router } from 'vue-router';
 
 interface Tournament {
 	tournamentId: number;
@@ -79,6 +80,12 @@ const formatScorersList = (
 
 	return scorers || '-';
 };
+
+// 大会詳細ページに遷移する関数
+const router: Router = useRouter();
+const navigateToDetail = (tournamentId: number) => {
+	router.push(`/tournaments/${tournamentId}`);
+};
 </script>
 
 <template>
@@ -150,6 +157,7 @@ const formatScorersList = (
 						<td class="py-3 px-6 text-center">
 							<button
 								class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+								@click="navigateToDetail(tournament.tournamentId)"
 							>
 								詳細
 							</button>
