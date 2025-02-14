@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db'); // データベース接続を管理するモジュール
 
-// 大会一覧を取得
+/*
+ * 大会一覧取得API
+ * GET /tournaments
+ */
 router.get('/', (req, res) => {
-	// 暫定のクエリ
 	const query = `
     SELECT
       t.id AS tournament_id,
@@ -65,7 +67,10 @@ router.get('/', (req, res) => {
 	});
 });
 
-// 新しい大会を登録
+/*
+ * 大会作成API
+ * POST /tournaments/create
+ */
 router.post('/create', (req, res) => {
 	const { startDate, players } = req.body;
 
@@ -126,6 +131,67 @@ router.post('/create', (req, res) => {
 				});
 			});
 		});
+	});
+});
+
+/*
+ * 大会詳細取得API
+ * GET /tournaments/:id
+ */
+router.get('/:id', async (req, res) => {
+	const tournamentId = req.params.id;
+
+	// 大会情報と選手情報を結合して取得するクエリ
+	const query = `
+    SELECT 
+      t.id as tournament_id,
+      t.start_date,
+      t.comment,
+      t.wins,
+      t.losses,
+      t.mvp_player_id,
+      p.id as player_id,
+      p.name as player_name,
+      p.position,
+      p.team,
+      p.is_starter,
+      p.total_goals,
+      p.total_assists
+    FROM tournaments t
+    LEFT JOIN players p ON t.id = p.tournament_id
+    WHERE t.id = ?
+  `;
+
+	db.query(query, [tournamentId], (err, results) => {
+		if (err) {
+			console.error('大会詳細取得エラー:', err);
+			return res.status(500).json({ error: '大会詳細取得エラー' });
+		}
+
+		if (results.length === 0) {
+			return res.status(404).json({ message: '大会が見つかりません' });
+		}
+
+		// 大会データの整形
+		const tournament = {
+			tournamentId: results[0].tournament_id,
+			startDate: results[0].start_date,
+			comment: results[0].comment,
+			wins: results[0].wins,
+			losses: results[0].losses,
+			mvpPlayerId: results[0].mvp_player_id,
+			players: results.map((row) => ({
+				playerId: row.player_id,
+				playerName: row.player_name,
+				position: row.position,
+				team: row.team,
+				isStarter: !!row.is_starter,
+				totalGoals: Number(row.total_goals),
+				totalAssists: Number(row.total_assists),
+			})),
+		};
+
+		res.status(200).json(tournament);
 	});
 });
 
