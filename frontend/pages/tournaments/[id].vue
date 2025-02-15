@@ -1,8 +1,72 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { API_ENDPOINTS } from '~/constants/api';
+import { Icon } from '@iconify/vue';
+
+interface Player {
+	playerId: string;
+	playerName: string;
+	position: 'GK' | 'DF' | 'MF' | 'FW';
+	team: string;
+	isStarter: boolean;
+	totalGoals: number;
+	totalAssists: number;
+}
+
+interface Tournament {
+	tournamentId: string;
+	startDate: string;
+	comment: string | null;
+	wins: number;
+	losses: number;
+	mvpPlayerId: string | null;
+	players: Player[];
+}
 
 const route = useRoute();
+const tournament = ref<Tournament | null>(null);
+const editableTournament = ref<Tournament | null>(null);
+const loading = ref(true);
+const error = ref<string | null>(null);
+const isEditing = ref(false);
+const isSaving = ref(false);
+
+// 編集モードの切り替え
+const toggleEditMode = () => {
+	if (isEditing.value) {
+		// 編集モードを終了する前に確認
+		if (confirm('編集内容を破棄してよろしいですか？')) {
+			isEditing.value = false;
+			// 編集内容を元に戻す
+			editableTournament.value = JSON.parse(JSON.stringify(tournament.value));
+		}
+	} else {
+		isEditing.value = true;
+		// 編集用のデータを複製
+		editableTournament.value = JSON.parse(JSON.stringify(tournament.value));
+	}
+};
+
+// 更新処理
+const handleUpdate = async () => {
+	if (!editableTournament.value) return;
+
+	// try {
+	//   isSaving.value = true;
+	//   const response = await axios.put(
+	//     `${API_ENDPOINTS.TOURNAMENTS.UPDATE}/${route.params.id}`,
+	//     editableTournament.value
+	//   );
+	//   tournament.value = response.data;
+	//   isEditing.value = false;
+	//   alert('更新が完了しました');
+	// } catch (err) {
+	//   console.error('Error updating tournament:', err);
+	//   alert('更新に失敗しました');
+	// } finally {
+	//   isSaving.value = false;
+	// }
+};
 
 // 大会詳細を取得する関数
 const fetchTournament = async () => {
@@ -11,11 +75,32 @@ const fetchTournament = async () => {
 			API_ENDPOINTS.TOURNAMENTS.DETAIL(route.params.id as string)
 		);
 		const data = await response.json();
+		tournament.value = data;
 		console.log('大会詳細:', data);
 	} catch (error) {
 		console.error('大会詳細取得エラー:', error);
+	} finally {
+		loading.value = false;
 	}
 };
+
+// 選手をポジションとスターター状態でソート
+const sortedPlayers = computed(() => {
+	if (!tournament.value?.players) return [];
+
+	const positionOrder = { GK: 1, DF: 2, MF: 3, FW: 4 };
+	return [...tournament.value.players].sort((a, b) => {
+		if (a.isStarter !== b.isStarter) return b.isStarter ? 1 : -1;
+		return positionOrder[a.position] - positionOrder[b.position];
+	});
+});
+
+// 勝率を計算
+const winRate = computed(() => {
+	if (!tournament.value) return 0;
+	const total = tournament.value.wins + tournament.value.losses;
+	return total === 0 ? 0 : Math.round((tournament.value.wins / total) * 100);
+});
 
 onMounted(() => {
 	fetchTournament();
@@ -23,13 +108,335 @@ onMounted(() => {
 </script>
 
 <template>
-	<div>
-		<h1 class="text-2xl font-semibold text-gray-900">大会詳細</h1>
-		<NuxtLink
-			to="/tournaments"
-			class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-		>
-			一覧に戻る
-		</NuxtLink>
+	<div class="min-h-screen bg-gray-50">
+		<!-- ヘッダー -->
+		<header class="bg-white shadow">
+			<div
+				class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center"
+			>
+				<h1 class="text-3xl font-bold text-gray-900">大会詳細</h1>
+				<div class="flex space-x-4">
+					<button
+						v-if="!isEditing"
+						@click="toggleEditMode"
+						class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+					>
+						<Icon name="heroicons:pencil" class="mr-2 h-4 w-4" />
+						編集する
+					</button>
+					<div v-else class="flex space-x-2">
+						<button
+							@click="handleUpdate"
+							:disabled="isSaving"
+							class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+						>
+							<Icon name="heroicons:check" class="mr-2 h-4 w-4" />
+							{{ isSaving ? '更新中...' : '更新する' }}
+						</button>
+						<button
+							@click="toggleEditMode"
+							:disabled="isSaving"
+							class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+						>
+							<Icon name="heroicons:x-mark" class="mr-2 h-4 w-4" />
+							キャンセル
+						</button>
+					</div>
+					<NuxtLink
+						to="/tournaments"
+						class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+					>
+						一覧に戻る
+					</NuxtLink>
+				</div>
+			</div>
+		</header>
+
+		<main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+			<!-- ローディング -->
+			<div v-if="loading" class="flex justify-center items-center h-64">
+				<div
+					class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"
+				></div>
+			</div>
+
+			<!-- エラー -->
+			<div v-else-if="error" class="rounded-md bg-red-50 p-4">
+				<div class="flex">
+					<Icon
+						name="heroicons:exclamation-circle"
+						class="h-5 w-5 text-red-400"
+					/>
+					<div class="ml-3">
+						<h3 class="text-sm font-medium text-red-800">エラー</h3>
+						<div class="mt-2 text-sm text-red-700">
+							{{ error }}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- 大会情報 -->
+			<div v-else class="space-y-6">
+				<!-- 基本情報カード -->
+				<div class="bg-white shadow overflow-hidden sm:rounded-lg">
+					<div class="px-4 py-5 sm:px-6">
+						<h2 class="text-lg leading-6 font-medium text-gray-900">
+							基本情報
+						</h2>
+					</div>
+					<div class="border-t border-gray-200">
+						<dl>
+							<div
+								class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+							>
+								<dt class="text-sm font-medium text-gray-500">開催日</dt>
+								<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+									{{
+										formatDate(
+											isEditing
+												? editableTournament?.startDate
+												: tournament?.startDate
+										)
+									}}
+								</dd>
+							</div>
+							<div
+								class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+							>
+								<dt class="text-sm font-medium text-gray-500">成績</dt>
+								<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+									<div v-if="!isEditing" class="flex items-center space-x-4">
+										<span class="font-semibold">
+											{{ tournament?.wins }}勝{{ tournament?.losses }}敗
+										</span>
+										<div class="flex items-center">
+											<div
+												class="h-2 w-24 bg-gray-200 rounded-full overflow-hidden"
+											>
+												<div
+													class="h-full bg-green-500"
+													:style="{ width: `${winRate}%` }"
+												></div>
+											</div>
+											<span class="ml-2 text-sm text-gray-600"
+												>{{ winRate }}%</span
+											>
+										</div>
+									</div>
+									<div v-else class="flex items-center space-x-4">
+										<div class="flex items-center space-x-2">
+											<input
+												v-model.number="editableTournament.wins"
+												type="number"
+												min="0"
+												class="block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+											/>
+											<span>勝</span>
+										</div>
+										<div class="flex items-center space-x-2">
+											<input
+												v-model.number="editableTournament.losses"
+												type="number"
+												min="0"
+												class="block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+											/>
+											<span>敗</span>
+										</div>
+									</div>
+								</dd>
+							</div>
+							<div
+								class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+							>
+								<dt class="text-sm font-medium text-gray-500">コメント</dt>
+								<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+									<template v-if="!isEditing">
+										{{ tournament?.comment || '（なし）' }}
+									</template>
+									<textarea
+										v-else
+										v-model="editableTournament.comment"
+										rows="3"
+										class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+									></textarea>
+								</dd>
+							</div>
+						</dl>
+					</div>
+				</div>
+
+				<!-- 選手一覧 -->
+				<div class="bg-white shadow overflow-hidden sm:rounded-lg">
+					<div class="px-4 py-5 sm:px-6">
+						<h2 class="text-lg leading-6 font-medium text-gray-900">
+							選手一覧
+						</h2>
+					</div>
+					<div class="flex flex-col">
+						<div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+							<div
+								class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8"
+							>
+								<div
+									class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg"
+								>
+									<table class="min-w-full divide-y divide-gray-200">
+										<thead class="bg-gray-50">
+											<tr>
+												<th
+													scope="col"
+													class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+												>
+													選手名
+												</th>
+												<th
+													scope="col"
+													class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+												>
+													ポジション
+												</th>
+												<th
+													scope="col"
+													class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+												>
+													所属
+												</th>
+												<th
+													scope="col"
+													class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+												>
+													得点
+												</th>
+												<th
+													scope="col"
+													class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+												>
+													アシスト
+												</th>
+												<th
+													scope="col"
+													class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+												>
+													スタメン
+												</th>
+											</tr>
+										</thead>
+										<tbody class="bg-white divide-y divide-gray-200">
+											<tr
+												v-for="player in sortedPlayers"
+												:key="player.playerId"
+												:class="{ 'bg-indigo-50': player.isStarter }"
+											>
+												<td class="px-6 py-4 whitespace-nowrap">
+													<div
+														v-if="!isEditing"
+														class="text-sm font-medium text-gray-900"
+													>
+														{{ player.playerName }}
+													</div>
+													<input
+														v-else
+														v-model="player.playerName"
+														type="text"
+														class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+													/>
+												</td>
+												<td class="px-6 py-4 whitespace-nowrap">
+													<template v-if="!isEditing">
+														<span
+															class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+															:class="{
+																'bg-red-100 text-red-800':
+																	player.position === 'FW',
+																'bg-green-100 text-green-800':
+																	player.position === 'MF',
+																'bg-blue-100 text-blue-800':
+																	player.position === 'DF',
+																'bg-yellow-100 text-yellow-800':
+																	player.position === 'GK',
+															}"
+														>
+															{{ player.position }}
+														</span>
+													</template>
+													<select
+														v-else
+														v-model="player.position"
+														class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+													>
+														<option value="GK">GK</option>
+														<option value="DF">DF</option>
+														<option value="MF">MF</option>
+														<option value="FW">FW</option>
+													</select>
+												</td>
+												<td class="px-6 py-4 whitespace-nowrap">
+													<div v-if="!isEditing" class="text-sm text-gray-500">
+														{{ player.team }}
+													</div>
+													<input
+														v-else
+														v-model="player.team"
+														type="text"
+														class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+													/>
+												</td>
+												<td class="px-6 py-4 whitespace-nowrap">
+													<div v-if="!isEditing" class="text-sm text-gray-900">
+														{{ player.totalGoals }}
+													</div>
+													<input
+														v-else
+														v-model.number="player.totalGoals"
+														type="number"
+														min="0"
+														class="block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+													/>
+												</td>
+												<td class="px-6 py-4 whitespace-nowrap">
+													<div v-if="!isEditing" class="text-sm text-gray-900">
+														{{ player.totalAssists }}
+													</div>
+													<input
+														v-else
+														v-model.number="player.totalAssists"
+														type="number"
+														min="0"
+														class="block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+													/>
+												</td>
+												<td class="px-6 py-4 whitespace-nowrap">
+													<template v-if="!isEditing">
+														<Icon
+															v-if="player.isStarter"
+															name="heroicons:check-circle"
+															class="h-5 w-5 text-green-500"
+														/>
+														<Icon
+															v-else
+															name="heroicons:minus-circle"
+															class="h-5 w-5 text-gray-400"
+														/>
+													</template>
+													<select
+														v-else
+														v-model="player.isStarter"
+														class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+													>
+														<option :value="true">スタメン</option>
+														<option :value="false">ベンチ</option>
+													</select>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
 	</div>
 </template>
