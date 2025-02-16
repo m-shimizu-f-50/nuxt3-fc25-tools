@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { API_ENDPOINTS } from '~/constants/api';
-import { Icon } from '@iconify/vue';
 
 interface Player {
 	playerId: string;
@@ -49,7 +48,10 @@ const toggleEditMode = () => {
 
 // 更新処理
 const handleUpdate = async () => {
+	console.log('更新処理', editableTournament.value);
 	if (!editableTournament.value) return;
+
+	// 更新前にソート処理を実行(選手をポジションとスターター状態でソート)
 
 	// try {
 	//   isSaving.value = true;
@@ -76,7 +78,6 @@ const fetchTournament = async () => {
 		);
 		const data = await response.json();
 		tournament.value = data;
-		console.log('大会詳細:', data);
 	} catch (error) {
 		console.error('大会詳細取得エラー:', error);
 	} finally {
@@ -84,15 +85,38 @@ const fetchTournament = async () => {
 	}
 };
 
-// 選手をポジションとスターター状態でソート
-const sortedPlayers = computed(() => {
-	if (!tournament.value?.players) return [];
+// 日付データをフォーマット
+const formatDate = (isoDate: string | undefined | null) => {
+	if (!isoDate) return '';
+	const dateObj = new Date(isoDate);
+	const year = dateObj.getUTCFullYear();
+	const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+	const day = String(dateObj.getUTCDate()).padStart(2, '0');
+	return `${year}-${month}-${day}`;
+};
 
-	const positionOrder = { GK: 1, DF: 2, MF: 3, FW: 4 };
-	return [...tournament.value.players].sort((a, b) => {
+// 選手をポジションとスターター状態でソート
+const sortPlayers = (players: Player[]): Player[] => {
+	const positionOrder = { GK: 4, DF: 3, MF: 2, FW: 1 };
+	return [...players].sort((a, b) => {
 		if (a.isStarter !== b.isStarter) return b.isStarter ? 1 : -1;
 		return positionOrder[a.position] - positionOrder[b.position];
 	});
+};
+
+// 選手整頓ボタンのハンドラー
+const handleSort = () => {
+	if (!editableTournament.value?.players) return;
+	editableTournament.value.players = sortPlayers(
+		editableTournament.value.players
+	);
+};
+
+// 表示用の選手データ
+const displayPlayers = computed(() => {
+	return isEditing.value
+		? editableTournament.value?.players || []
+		: tournament.value?.players || [];
 });
 
 // 勝率を計算
@@ -121,7 +145,6 @@ onMounted(() => {
 						@click="toggleEditMode"
 						class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
 					>
-						<Icon name="heroicons:pencil" class="mr-2 h-4 w-4" />
 						編集する
 					</button>
 					<div v-else class="flex space-x-2">
@@ -130,7 +153,6 @@ onMounted(() => {
 							:disabled="isSaving"
 							class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
 						>
-							<Icon name="heroicons:check" class="mr-2 h-4 w-4" />
 							{{ isSaving ? '更新中...' : '更新する' }}
 						</button>
 						<button
@@ -138,7 +160,6 @@ onMounted(() => {
 							:disabled="isSaving"
 							class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
 						>
-							<Icon name="heroicons:x-mark" class="mr-2 h-4 w-4" />
 							キャンセル
 						</button>
 					</div>
@@ -163,10 +184,6 @@ onMounted(() => {
 			<!-- エラー -->
 			<div v-else-if="error" class="rounded-md bg-red-50 p-4">
 				<div class="flex">
-					<Icon
-						name="heroicons:exclamation-circle"
-						class="h-5 w-5 text-red-400"
-					/>
 					<div class="ml-3">
 						<h3 class="text-sm font-medium text-red-800">エラー</h3>
 						<div class="mt-2 text-sm text-red-700">
@@ -230,7 +247,7 @@ onMounted(() => {
 												v-model.number="editableTournament.wins"
 												type="number"
 												min="0"
-												class="block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+												class="block w-20 p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 											/>
 											<span>勝</span>
 										</div>
@@ -239,7 +256,7 @@ onMounted(() => {
 												v-model.number="editableTournament.losses"
 												type="number"
 												min="0"
-												class="block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+												class="block w-20 p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 											/>
 											<span>敗</span>
 										</div>
@@ -258,7 +275,7 @@ onMounted(() => {
 										v-else
 										v-model="editableTournament.comment"
 										rows="3"
-										class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+										class="block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 									></textarea>
 								</dd>
 							</div>
@@ -268,10 +285,17 @@ onMounted(() => {
 
 				<!-- 選手一覧 -->
 				<div class="bg-white shadow overflow-hidden sm:rounded-lg">
-					<div class="px-4 py-5 sm:px-6">
+					<div class="px-4 py-5 sm:px-6 flex justify-between items-center">
 						<h2 class="text-lg leading-6 font-medium text-gray-900">
 							選手一覧
 						</h2>
+						<button
+							v-if="isEditing"
+							@click="handleSort"
+							class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+						>
+							選手を整頓
+						</button>
 					</div>
 					<div class="flex flex-col">
 						<div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -324,7 +348,7 @@ onMounted(() => {
 										</thead>
 										<tbody class="bg-white divide-y divide-gray-200">
 											<tr
-												v-for="player in sortedPlayers"
+												v-for="player in displayPlayers"
 												:key="player.playerId"
 												:class="{ 'bg-indigo-50': player.isStarter }"
 											>
@@ -339,7 +363,7 @@ onMounted(() => {
 														v-else
 														v-model="player.playerName"
 														type="text"
-														class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+														class="block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 													/>
 												</td>
 												<td class="px-6 py-4 whitespace-nowrap">
@@ -363,7 +387,7 @@ onMounted(() => {
 													<select
 														v-else
 														v-model="player.position"
-														class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+														class="block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 													>
 														<option value="GK">GK</option>
 														<option value="DF">DF</option>
@@ -379,7 +403,7 @@ onMounted(() => {
 														v-else
 														v-model="player.team"
 														type="text"
-														class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+														class="block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 													/>
 												</td>
 												<td class="px-6 py-4 whitespace-nowrap">
@@ -391,7 +415,7 @@ onMounted(() => {
 														v-model.number="player.totalGoals"
 														type="number"
 														min="0"
-														class="block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+														class="block w-20 p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 													/>
 												</td>
 												<td class="px-6 py-4 whitespace-nowrap">
@@ -403,26 +427,25 @@ onMounted(() => {
 														v-model.number="player.totalAssists"
 														type="number"
 														min="0"
-														class="block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+														class="block w-20 p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 													/>
 												</td>
 												<td class="px-6 py-4 whitespace-nowrap">
 													<template v-if="!isEditing">
-														<Icon
-															v-if="player.isStarter"
-															name="heroicons:check-circle"
-															class="h-5 w-5 text-green-500"
-														/>
-														<Icon
-															v-else
-															name="heroicons:minus-circle"
-															class="h-5 w-5 text-gray-400"
-														/>
+														<span
+															class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+															:class="{
+																'bg-green-100 text-green-800': player.isStarter,
+																'bg-red-100 text-red-800': !player.isStarter,
+															}"
+														>
+															{{ player.isStarter ? 'スタメン' : 'ベンチ' }}
+														</span>
 													</template>
 													<select
 														v-else
 														v-model="player.isStarter"
-														class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+														class="block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 													>
 														<option :value="true">スタメン</option>
 														<option :value="false">ベンチ</option>
