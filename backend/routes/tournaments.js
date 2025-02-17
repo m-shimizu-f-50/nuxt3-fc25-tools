@@ -195,4 +195,139 @@ router.get('/:id', async (req, res) => {
 	});
 });
 
+/*
+ * 大会情報更新API
+ * PUT /tournaments/:id
+ * 大会情報と選手情報を更新
+ */
+router.put('/:id', (req, res) => {
+	const tournamentId = req.params.id;
+	const { startDate, comment, wins, losses, players } = req.body;
+
+	// まず大会情報を更新
+	const updateTournamentQuery = `
+    UPDATE tournaments 
+    SET 
+      start_date = ?,
+      comment = ?,
+      wins = ?,
+      losses = ?
+    WHERE id = ?
+  `;
+
+	db.query(
+		updateTournamentQuery,
+		[startDate, comment, wins, losses, tournamentId],
+		(err, results) => {
+			if (err) {
+				console.error('大会更新エラー:', err);
+				return res.status(500).json({ error: '大会更新エラー' });
+			}
+
+			// 次に選手情報を更新
+			const updatePlayersQuery = `
+      UPDATE players 
+      SET 
+        name = CASE id 
+          ${players
+						.map((p) => `WHEN '${p.playerId}' THEN '${p.playerName}'`)
+						.join(' ')}
+          ELSE name 
+        END,
+        position = CASE id 
+          ${players
+						.map((p) => `WHEN '${p.playerId}' THEN '${p.position}'`)
+						.join(' ')}
+          ELSE position 
+        END,
+        team = CASE id 
+          ${players
+						.map((p) => `WHEN '${p.playerId}' THEN '${p.team}'`)
+						.join(' ')}
+          ELSE team 
+        END,
+        is_starter = CASE id 
+          ${players
+						.map((p) => `WHEN '${p.playerId}' THEN ${p.isStarter ? 1 : 0}`)
+						.join(' ')}
+          ELSE is_starter 
+        END,
+        total_goals = CASE id 
+          ${players
+						.map((p) => `WHEN '${p.playerId}' THEN ${p.totalGoals}`)
+						.join(' ')}
+          ELSE total_goals 
+        END,
+        total_assists = CASE id 
+          ${players
+						.map((p) => `WHEN '${p.playerId}' THEN ${p.totalAssists}`)
+						.join(' ')}
+          ELSE total_assists 
+        END
+      WHERE tournament_id = ?
+    `;
+
+			db.query(updatePlayersQuery, [tournamentId], (err, results) => {
+				if (err) {
+					console.error('選手更新エラー:', err);
+					return res.status(500).json({ error: '選手更新エラー' });
+				}
+
+				// 更新後のデータを取得
+				const selectQuery = `
+        SELECT 
+          t.id as tournament_id,
+          t.start_date,
+          t.comment,
+          t.wins,
+          t.losses,
+          t.mvp_player_id,
+          p.id as player_id,
+          p.name as player_name,
+          p.position,
+          p.team,
+          p.is_starter,
+          p.total_goals,
+          p.total_assists
+        FROM tournaments t
+        LEFT JOIN players p ON t.id = p.tournament_id
+        WHERE t.id = ?
+      `;
+
+				db.query(selectQuery, [tournamentId], (err, results) => {
+					if (err) {
+						console.error('大会詳細取得エラー:', err);
+						return res.status(500).json({ error: '大会詳細取得エラー' });
+					}
+
+					if (results.length === 0) {
+						return res.status(404).json({ message: '大会が見つかりません' });
+					}
+
+					// 大会データの整形
+					const tournament = {
+						tournamentId: results[0].tournament_id,
+						startDate: results[0].start_date,
+						comment: results[0].comment,
+						wins: results[0].wins,
+						losses: results[0].losses,
+						mvpPlayerId: results[0].mvp_player_id,
+						players: results.map((row) => ({
+							playerId: row.player_id,
+							playerName: row.player_name,
+							position: row.position,
+							team: row.team,
+							isStarter: !!row.is_starter,
+							totalGoals: row.total_goals,
+							totalAssists: row.total_assists,
+						})),
+					};
+
+					res.status(200).json(tournament);
+				});
+			});
+		}
+	);
+});
+
 module.exports = router;
