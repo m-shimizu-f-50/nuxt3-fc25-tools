@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import axios from 'axios';
 import { ref, onMounted, computed } from 'vue';
 import { API_ENDPOINTS } from '~/constants/api';
 
@@ -53,21 +54,94 @@ const handleUpdate = async () => {
 
 	// 更新前にソート処理を実行(選手をポジションとスターター状態でソート)
 
-	// try {
-	//   isSaving.value = true;
-	//   const response = await axios.put(
-	//     `${API_ENDPOINTS.TOURNAMENTS.UPDATE}/${route.params.id}`,
-	//     editableTournament.value
-	//   );
-	//   tournament.value = response.data;
-	//   isEditing.value = false;
-	//   alert('更新が完了しました');
-	// } catch (err) {
-	//   console.error('Error updating tournament:', err);
-	//   alert('更新に失敗しました');
-	// } finally {
-	//   isSaving.value = false;
-	// }
+	try {
+		// 通信中フラグを立てる
+		isSaving.value = true;
+
+		// 更新前にプレイヤーをソート
+		editableTournament.value.players = sortPlayers(
+			editableTournament.value.players
+		);
+
+		// 日付をYYYY-MM-DD形式に変換
+		const formatDate = (dateString: string) => {
+			const date = new Date(dateString);
+			return date.toISOString().split('T')[0]; // 'YYYY-MM-DD'形式に変換
+		};
+		const formattedStartDate = formatDate(editableTournament.value.startDate);
+
+		// バリデーション
+		const errors: string[] = [];
+
+		// 選手のバリデーション
+		const playerNames = editableTournament.value.players.map((p) =>
+			p.playerName.trim()
+		);
+		const duplicateNames = playerNames.filter(
+			(name, index) => playerNames.indexOf(name) !== index
+		);
+
+		if (duplicateNames.length > 0) {
+			errors.push(
+				`以下の選手名が重複しています：${Array.from(
+					new Set(duplicateNames)
+				).join(', ')}`
+			);
+		}
+
+		// スターター11人、ベンチ7人の構成チェック
+		const starters = editableTournament.value.players.filter(
+			(p) => p.isStarter
+		);
+		const bench = editableTournament.value.players.filter((p) => !p.isStarter);
+
+		if (starters.length !== 11) {
+			errors.push(
+				`スターティングメンバーは11人である必要があります（現在：${starters.length}人）`
+			);
+		}
+
+		if (bench.length !== 7) {
+			errors.push(
+				`ベンチメンバーは7人である必要があります（現在：${bench.length}人）`
+			);
+		}
+
+		// エラーがある場合は更新を中止
+		if (errors.length > 0) {
+			alert(errors.join('\n'));
+			return;
+		}
+
+		const response = await axios.put(
+			API_ENDPOINTS.TOURNAMENTS.UPDATE(route.params.id as string),
+			{
+				startDate: formattedStartDate,
+				comment: editableTournament.value.comment,
+				wins: editableTournament.value.wins,
+				losses: editableTournament.value.losses,
+				mvpPlayerId: null, // 今回はMVPは未使用
+				players: editableTournament.value.players.map((player) => ({
+					playerId: player.playerId,
+					playerName: player.playerName,
+					position: player.position,
+					team: player.team,
+					isStarter: player.isStarter,
+					totalGoals: player.totalGoals,
+					totalAssists: player.totalAssists,
+				})),
+			}
+		);
+
+		tournament.value = response.data;
+		isEditing.value = false;
+		alert('更新が完了しました');
+	} catch (error) {
+		console.error('Error updating tournament:', error);
+		alert('更新に失敗しました');
+	} finally {
+		isSaving.value = false;
+	}
 };
 
 // 大会詳細を取得する関数
