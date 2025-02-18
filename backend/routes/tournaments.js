@@ -206,8 +206,8 @@ router.put('/:id', (req, res) => {
 
 	// まず大会情報を更新
 	const updateTournamentQuery = `
-    UPDATE tournaments 
-    SET 
+    UPDATE tournaments
+    SET
       start_date = ?,
       comment = ?,
       wins = ?,
@@ -226,43 +226,43 @@ router.put('/:id', (req, res) => {
 
 			// 次に選手情報を更新
 			const updatePlayersQuery = `
-      UPDATE players 
-      SET 
-        name = CASE id 
+      UPDATE players
+      SET
+        name = CASE id
           ${players
 						.map((p) => `WHEN '${p.playerId}' THEN '${p.playerName}'`)
 						.join(' ')}
-          ELSE name 
+          ELSE name
         END,
-        position = CASE id 
+        position = CASE id
           ${players
 						.map((p) => `WHEN '${p.playerId}' THEN '${p.position}'`)
 						.join(' ')}
-          ELSE position 
+          ELSE position
         END,
-        team = CASE id 
+        team = CASE id
           ${players
 						.map((p) => `WHEN '${p.playerId}' THEN '${p.team}'`)
 						.join(' ')}
-          ELSE team 
+          ELSE team
         END,
-        is_starter = CASE id 
+        is_starter = CASE id
           ${players
 						.map((p) => `WHEN '${p.playerId}' THEN ${p.isStarter ? 1 : 0}`)
 						.join(' ')}
-          ELSE is_starter 
+          ELSE is_starter
         END,
-        total_goals = CASE id 
+        total_goals = CASE id
           ${players
 						.map((p) => `WHEN '${p.playerId}' THEN ${p.totalGoals}`)
 						.join(' ')}
-          ELSE total_goals 
+          ELSE total_goals
         END,
-        total_assists = CASE id 
+        total_assists = CASE id
           ${players
 						.map((p) => `WHEN '${p.playerId}' THEN ${p.totalAssists}`)
 						.join(' ')}
-          ELSE total_assists 
+          ELSE total_assists
         END
       WHERE tournament_id = ?
     `;
@@ -275,7 +275,7 @@ router.put('/:id', (req, res) => {
 
 				// 更新後のデータを取得
 				const selectQuery = `
-        SELECT 
+        SELECT
           t.id as tournament_id,
           t.start_date,
           t.comment,
@@ -328,6 +328,47 @@ router.put('/:id', (req, res) => {
 			});
 		}
 	);
+});
+
+/*
+ * 大会削除API
+ * DELETE /tournaments/:id
+ * 大会情報と選手情報を削除
+ */
+router.delete('/:id', (req, res) => {
+	const tournamentId = req.params.id;
+
+	// 大会に紐づく選手を先に削除
+	const deletePlayersQuery = `
+    DELETE FROM players
+    WHERE tournament_id = ?
+  `;
+
+	db.query(deletePlayersQuery, [tournamentId], (err, results) => {
+		if (err) {
+			console.error('選手削除エラー:', err);
+			return res.status(500).json({ error: '選手削除エラー' });
+		}
+
+		// 大会を削除
+		const deleteTournamentQuery = `
+      DELETE FROM tournaments
+      WHERE id = ?
+    `;
+
+		db.query(deleteTournamentQuery, [tournamentId], (err, results) => {
+			if (err) {
+				console.error('大会削除エラー:', err);
+				return res.status(500).json({ error: '大会削除エラー' });
+			}
+
+			if (results.affectedRows === 0) {
+				return res.status(404).json({ message: '大会が見つかりません' });
+			}
+
+			res.status(200).json({ message: '大会を削除しました' });
+		});
+	});
 });
 
 module.exports = router;
