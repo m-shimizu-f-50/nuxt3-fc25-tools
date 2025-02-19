@@ -31,6 +31,11 @@ const fetchTournaments = async () => {
 	}
 };
 
+// 大会を削除する関数
+const handleDeleteTournament = async (tournamentId: number) => {
+	console.log('削除対象の大会ID:', tournamentId);
+};
+
 onMounted(() => {
 	fetchTournaments();
 });
@@ -154,13 +159,24 @@ const navigateToDetail = (tournamentId: number) => {
 									: `Rank ${computeRank(tournament.wins)}`
 							}}
 						</td>
-						<td class="py-3 px-6 text-center">
-							<button
-								class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-								@click="navigateToDetail(tournament.tournamentId)"
-							>
-								詳細
-							</button>
+						<td class="py-4 px-6 text-center">
+							<div class="flex justify-center space-x-2">
+								<!-- 詳細ボタン -->
+								<button
+									class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+									@click="navigateToDetail(tournament.tournamentId)"
+								>
+									詳細
+								</button>
+
+								<!-- 削除ボタン -->
+								<button
+									class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+									@click="handleDeleteTournament(tournament.tournamentId)"
+								>
+									削除
+								</button>
+							</div>
 						</td>
 					</tr>
 				</tbody>
