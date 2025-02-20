@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { API_ENDPOINTS } from '~/constants/api';
 import { formatDate } from '~/utils/date';
+import axios from 'axios';
 import type { Router } from 'vue-router';
 
 interface Tournament {
@@ -34,6 +35,24 @@ const fetchTournaments = async () => {
 // 大会を削除する関数
 const handleDeleteTournament = async (tournamentId: number) => {
 	console.log('削除対象の大会ID:', tournamentId);
+	// 削除確認
+	if (
+		!confirm(
+			'この大会を削除してもよろしいですか？\n※この操作は取り消せません。'
+		)
+	) {
+		return;
+	}
+
+	try {
+		await axios.delete(API_ENDPOINTS.TOURNAMENTS.DELETE(String(tournamentId)));
+		alert('大会を削除しました');
+		// 一覧画面へ遷移
+		router.push('/tournaments');
+	} catch (err) {
+		console.error('Error deleting tournament:', err);
+		alert('削除に失敗しました');
+	}
 };
 
 onMounted(() => {
