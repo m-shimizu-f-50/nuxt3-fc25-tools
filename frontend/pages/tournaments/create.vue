@@ -6,6 +6,7 @@ import { useForm, useField, useFieldArray } from 'vee-validate';
 import * as yup from 'yup';
 import axios from 'axios';
 import { API_ENDPOINTS } from '~/constants/api';
+import type { Router } from 'vue-router';
 
 interface Player {
 	name: string;
@@ -18,6 +19,8 @@ interface FormData {
 	startDate: Date | null;
 	players: Player[];
 }
+
+const router: Router = useRouter();
 
 // 今日の日付を取得（時刻は00:00:00に設定）
 const today = new Date();
@@ -327,7 +330,8 @@ const submitForm = handleSubmit(async (values) => {
 			})),
 		});
 		console.log('登録成功:', response.data);
-		// 成功時の処理（例：一覧ページへの遷移）
+		// 一覧画面へ遷移
+		router.push('/tournaments');
 	} catch (error) {
 		console.error('登録エラー:', error);
 		// エラー時の処理
