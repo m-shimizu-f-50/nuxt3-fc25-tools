@@ -48,7 +48,8 @@ router.get('/', (req, res) => {
 					players: [],
 				};
 			}
-			if (row.player_id) { // プレイヤーが存在する場合のみ追加
+			if (row.player_id) {
+				// プレイヤーが存在する場合のみ追加
 				tournaments[row.tournament_id].players.push({
 					playerId: row.player_id, // UUIDをそのまま使用
 					playerName: row.player_name,
@@ -110,7 +111,7 @@ router.post('/create', (req, res) => {
     `;
 
 		// 選手データの配列を作成
-		const playersValues = players.map(player => [
+		const playersValues = players.map((player) => [
 			uuidv4(), // 選手IDを生成
 			tournamentId,
 			player.name,
@@ -118,7 +119,7 @@ router.post('/create', (req, res) => {
 			player.team,
 			player.isStarter,
 			0, // total_goals の初期値
-			0  // total_assists の初期値
+			0, // total_assists の初期値
 		]);
 
 		db.query(insertPlayersQuery, [playersValues], (err, results) => {
@@ -162,15 +163,15 @@ router.post('/create', (req, res) => {
 					wins: results[0].wins,
 					losses: results[0].losses,
 					mvpPlayerId: results[0].mvp_player_id,
-					players: results.map(row => ({
+					players: results.map((row) => ({
 						playerId: row.player_id,
 						playerName: row.player_name,
 						position: row.position,
 						team: row.team,
 						isStarter: !!row.is_starter,
 						totalGoals: row.total_goals,
-						totalAssists: row.total_assists
-					}))
+						totalAssists: row.total_assists,
+					})),
 				};
 
 				res.status(201).json(tournament);
@@ -247,7 +248,7 @@ router.get('/:id', async (req, res) => {
  */
 router.put('/:id', (req, res) => {
 	const tournamentId = req.params.id;
-	const { startDate, comment, wins, losses, players } = req.body;
+	const { startDate, comment, wins, losses, mvpPlayerId, players } = req.body;
 
 	// まず大会情報を更新
 	const updateTournamentQuery = `
@@ -256,13 +257,14 @@ router.put('/:id', (req, res) => {
       start_date = ?,
       comment = ?,
       wins = ?,
-      losses = ?
+      losses = ?,
+      mvp_player_id = ?
     WHERE id = ?
   `;
 
 	db.query(
 		updateTournamentQuery,
-		[startDate, comment, wins, losses, tournamentId],
+		[startDate, comment, wins, losses, mvpPlayerId || null, tournamentId],
 		(err, results) => {
 			if (err) {
 				console.error('大会更新エラー:', err);

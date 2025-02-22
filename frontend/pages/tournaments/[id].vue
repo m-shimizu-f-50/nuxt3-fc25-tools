@@ -24,12 +24,13 @@ interface Tournament {
 }
 
 const route = useRoute();
-const tournament = ref<Tournament | null>(null);
-const editableTournament = ref<Tournament | null>(null);
+const tournament = ref<Tournament | null>(null); // 大会データ
+const editableTournament = ref<Tournament | null>(null); // 編集用の大会データ
 const loading = ref(true);
 const error = ref<string | null>(null);
 const isEditing = ref(false);
 const isSaving = ref(false);
+const displayPlayers = ref<Player[]>([]); // 表示用の選手データをrefで管理
 
 // 編集モードの切り替え
 const toggleEditMode = () => {
@@ -39,29 +40,29 @@ const toggleEditMode = () => {
 			isEditing.value = false;
 			// 編集内容を元に戻す
 			editableTournament.value = JSON.parse(JSON.stringify(tournament.value));
+			// 表示用の選手データを更新
+			displayPlayers.value = sortPlayers(tournament.value?.players) || [];
 		}
 	} else {
 		isEditing.value = true;
 		// 編集用のデータを複製
 		editableTournament.value = JSON.parse(JSON.stringify(tournament.value));
+		// 表示用の選手データを更新
+		displayPlayers.value = sortPlayers(editableTournament.value?.players) || [];
 	}
 };
 
 // 更新処理
 const handleUpdate = async () => {
-	console.log('更新処理', editableTournament.value);
 	if (!editableTournament.value) return;
-
-	// 更新前にソート処理を実行(選手をポジションとスターター状態でソート)
 
 	try {
 		// 通信中フラグを立てる
 		isSaving.value = true;
 
 		// 更新前にプレイヤーをソート
-		editableTournament.value.players = sortPlayers(
-			editableTournament.value.players
-		);
+		displayPlayers.value = sortPlayers(displayPlayers.value);
+		editableTournament.value.players = displayPlayers.value;
 
 		// 日付をYYYY-MM-DD形式に変換
 		const formatDate = (dateString: string) => {
@@ -74,9 +75,7 @@ const handleUpdate = async () => {
 		const errors: string[] = [];
 
 		// 選手のバリデーション
-		const playerNames = editableTournament.value.players.map((p) =>
-			p.playerName.trim()
-		);
+		const playerNames = displayPlayers.value.map((p) => p.playerName.trim());
 		const duplicateNames = playerNames.filter(
 			(name, index) => playerNames.indexOf(name) !== index
 		);
@@ -90,10 +89,8 @@ const handleUpdate = async () => {
 		}
 
 		// スターター11人、ベンチ7人の構成チェック
-		const starters = editableTournament.value.players.filter(
-			(p) => p.isStarter
-		);
-		const bench = editableTournament.value.players.filter((p) => !p.isStarter);
+		const starters = displayPlayers.value.filter((p) => p.isStarter);
+		const bench = displayPlayers.value.filter((p) => !p.isStarter);
 
 		if (starters.length !== 11) {
 			errors.push(
@@ -120,8 +117,8 @@ const handleUpdate = async () => {
 				comment: editableTournament.value.comment,
 				wins: editableTournament.value.wins,
 				losses: editableTournament.value.losses,
-				mvpPlayerId: null, // 今回はMVPは未使用
-				players: editableTournament.value.players.map((player) => ({
+				mvpPlayerId: editableTournament.value.mvpPlayerId,
+				players: displayPlayers.value.map((player) => ({
 					playerId: player.playerId,
 					playerName: player.playerName,
 					position: player.position,
@@ -134,6 +131,7 @@ const handleUpdate = async () => {
 		);
 
 		tournament.value = response.data;
+		displayPlayers.value = sortPlayers(response.data.players);
 		isEditing.value = false;
 		alert('更新が完了しました');
 	} catch (error) {
@@ -152,6 +150,12 @@ const fetchTournament = async () => {
 		);
 		const data = await response.json();
 		tournament.value = data;
+
+		if (tournament.value?.players) {
+			// プレイヤーをポジションとスターター状態でソート
+			tournament.value.players = sortPlayers(tournament.value.players);
+			displayPlayers.value = tournament.value.players;
+		}
 	} catch (error) {
 		console.error('大会詳細取得エラー:', error);
 	} finally {
@@ -170,7 +174,8 @@ const formatDate = (isoDate: string | undefined | null) => {
 };
 
 // 選手をポジションとスターター状態でソート
-const sortPlayers = (players: Player[]): Player[] => {
+const sortPlayers = (players: Player[] | undefined): Player[] => {
+	if (!players) return [];
 	const positionOrder = { GK: 4, DF: 3, MF: 2, FW: 1 };
 	return [...players].sort((a, b) => {
 		if (a.isStarter !== b.isStarter) return b.isStarter ? 1 : -1;
@@ -180,18 +185,8 @@ const sortPlayers = (players: Player[]): Player[] => {
 
 // 選手整頓ボタンのハンドラー
 const handleSort = () => {
-	if (!editableTournament.value?.players) return;
-	editableTournament.value.players = sortPlayers(
-		editableTournament.value.players
-	);
+	displayPlayers.value = sortPlayers(displayPlayers.value);
 };
-
-// 表示用の選手データ
-const displayPlayers = computed(() => {
-	return isEditing.value
-		? editableTournament.value?.players || []
-		: tournament.value?.players || [];
-});
 
 // 勝率を計算
 const winRate = computed(() => {
@@ -351,6 +346,34 @@ onMounted(() => {
 										rows="3"
 										class="block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 									></textarea>
+								</dd>
+							</div>
+							<div
+								class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+							>
+								<dt class="text-sm font-medium text-gray-500">MVP選手</dt>
+								<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+									<template v-if="!isEditing">
+										{{
+											displayPlayers.find(
+												(p) => p.playerId === tournament?.mvpPlayerId
+											)?.playerName || '（未選択）'
+										}}
+									</template>
+									<select
+										v-else
+										v-model="editableTournament.mvpPlayerId"
+										class="block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+									>
+										<option value="">選手を選択</option>
+										<option
+											v-for="player in displayPlayers"
+											:key="player.playerId"
+											:value="player.playerId"
+										>
+											{{ player.playerName }} ({{ player.position }})
+										</option>
+									</select>
 								</dd>
 							</div>
 						</dl>
