@@ -41,14 +41,14 @@ const toggleEditMode = () => {
 			// 編集内容を元に戻す
 			editableTournament.value = JSON.parse(JSON.stringify(tournament.value));
 			// 表示用の選手データを更新
-			displayPlayers.value = tournament.value?.players || [];
+			displayPlayers.value = sortPlayers(tournament.value?.players) || [];
 		}
 	} else {
 		isEditing.value = true;
 		// 編集用のデータを複製
 		editableTournament.value = JSON.parse(JSON.stringify(tournament.value));
 		// 表示用の選手データを更新
-		displayPlayers.value = editableTournament.value?.players || [];
+		displayPlayers.value = sortPlayers(editableTournament.value?.players) || [];
 	}
 };
 
@@ -117,7 +117,7 @@ const handleUpdate = async () => {
 				comment: editableTournament.value.comment,
 				wins: editableTournament.value.wins,
 				losses: editableTournament.value.losses,
-				mvpPlayerId: null, // 今回はMVPは未使用
+				mvpPlayerId: editableTournament.value.mvpPlayerId,
 				players: displayPlayers.value.map((player) => ({
 					playerId: player.playerId,
 					playerName: player.playerName,
@@ -346,6 +346,34 @@ onMounted(() => {
 										rows="3"
 										class="block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 									></textarea>
+								</dd>
+							</div>
+							<div
+								class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+							>
+								<dt class="text-sm font-medium text-gray-500">MVP選手</dt>
+								<dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+									<template v-if="!isEditing">
+										{{
+											displayPlayers.find(
+												(p) => p.playerId === tournament?.mvpPlayerId
+											)?.playerName || '（未選択）'
+										}}
+									</template>
+									<select
+										v-else
+										v-model="editableTournament.mvpPlayerId"
+										class="block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+									>
+										<option value="">選手を選択</option>
+										<option
+											v-for="player in displayPlayers"
+											:key="player.playerId"
+											:value="player.playerId"
+										>
+											{{ player.playerName }} ({{ player.position }})
+										</option>
+									</select>
 								</dd>
 							</div>
 						</dl>
