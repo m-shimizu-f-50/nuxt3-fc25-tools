@@ -15,6 +15,7 @@ interface Tournament {
 		playerId: number;
 		playerName: string;
 		totalGoals: number;
+		totalAssists: number;
 	}[];
 }
 
@@ -103,10 +104,26 @@ const formatScorersList = (
 ) => {
 	const scorers = players
 		.filter((player) => player.totalGoals > 0)
+		.sort((a, b) => b.totalGoals - a.totalGoals)
+		.slice(0, 3)
 		.map((player) => `${player.playerName} (${player.totalGoals})`)
 		.join(', ');
 
 	return scorers || '-';
+};
+
+// アシスト者の名前をフォーマットする関数
+const formatAssistList = (
+	players: { playerName: string; totalAssists: number }[]
+) => {
+	const assists = players
+		.filter((player) => player.totalAssists > 0)
+		.sort((a, b) => b.totalAssists - a.totalAssists)
+		.slice(0, 3)
+		.map((player) => `${player.playerName} (${player.totalAssists})`)
+		.join(', ');
+
+	return assists || '-';
 };
 
 // 大会詳細ページに遷移する関数
@@ -132,78 +149,92 @@ const navigateToDetail = (tournamentId: number) => {
 		<div v-if="!tournaments.length" class="text-center py-12">
 			<div class="text-gray-500">データを読み込み中...</div>
 		</div>
-		<div v-else>
-			<table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-				<thead
-					class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal"
-				>
-					<tr>
-						<th class="py-3 px-6 text-left">対戦日時</th>
-						<th class="py-3 px-6 text-center">勝敗 (15試合)</th>
-						<th class="py-3 px-6 text-center">総得点</th>
-						<th class="py-3 px-6 text-center">得点者</th>
-						<th class="py-3 px-6 text-center">MVP</th>
-						<th class="py-3 px-6 text-center">ランク</th>
-						<th class="py-3 px-6 text-center">詳細</th>
-					</tr>
-				</thead>
-				<tbody class="text-gray-700">
-					<tr
-						v-for="tournament in tournaments"
-						:key="tournament.tournamentId"
-						class="border-b"
-					>
-						<td class="py-3 px-6">{{ formatDate(tournament.startDate) }}</td>
-						<td class="py-3 px-6 text-center">
-							<div class="flex justify-center">
-								{{ tournament.wins }}勝 / {{ tournament.losses }}敗 ({{
-									computeWinRate(tournament.wins, tournament.losses)
-								}})
-							</div>
-						</td>
-						<td class="py-3 px-6 text-center">
-							{{
-								tournament.players.reduce(
-									(acc, player) => acc + player.totalGoals,
-									0
-								)
-							}}
-						</td>
-						<td class="py-3 px-6 text-center">
-							{{ formatScorersList(tournament.players) }}
-						</td>
-						<td class="py-3 px-6 text-center font-bold text-blue-500">
-							{{ tournament.mvpName ?? '-' }}
-						</td>
-						<td class="py-3 px-6 text-center font-bold">
-							{{
-								tournament.wins === 0 && tournament.wins === 0
-									? `-`
-									: `Rank ${computeRank(tournament.wins)}`
-							}}
-						</td>
-						<td class="py-4 px-6 text-center">
-							<div class="flex justify-center space-x-2">
-								<!-- 詳細ボタン -->
-								<button
-									class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
-									@click="navigateToDetail(tournament.tournamentId)"
-								>
-									詳細
-								</button>
+		<div v-else class="overflow-x-auto">
+			<div class="inline-block min-w-full">
+				<div class="overflow-hidden">
+					<table class="min-w-full bg-white shadow-md rounded-lg">
+						<thead
+							class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal whitespace-nowrap"
+						>
+							<tr>
+								<th class="py-3 px-6 text-left">対戦日時</th>
+								<th class="py-3 px-6 text-center">勝敗 (15試合)</th>
+								<th class="py-3 px-6 text-center">総得点</th>
+								<th class="py-3 px-6 text-center min-w-[200px]">
+									ゴール(上位３名)
+								</th>
+								<th class="py-3 px-6 text-center min-w-[200px]">
+									アシスト(上位３名)
+								</th>
+								<th class="py-3 px-6 text-center">MVP</th>
+								<th class="py-3 px-6 text-center">ランク</th>
+								<th class="py-3 px-6 text-center">詳細</th>
+							</tr>
+						</thead>
+						<tbody class="text-gray-700">
+							<tr
+								v-for="tournament in tournaments"
+								:key="tournament.tournamentId"
+								class="border-b whitespace-nowrap hover:bg-gray-50"
+							>
+								<td class="py-3 px-6">
+									{{ formatDate(tournament.startDate) }}
+								</td>
+								<td class="py-3 px-6 text-center">
+									<div class="flex justify-center">
+										{{ tournament.wins }}勝 / {{ tournament.losses }}敗 ({{
+											computeWinRate(tournament.wins, tournament.losses)
+										}})
+									</div>
+								</td>
+								<td class="py-3 px-6 text-center">
+									{{
+										tournament.players.reduce(
+											(acc, player) => acc + player.totalGoals,
+											0
+										)
+									}}
+								</td>
+								<td class="py-3 px-6 text-center">
+									{{ formatScorersList(tournament.players) }}
+								</td>
+								<td class="py-3 px-6 text-center">
+									{{ formatAssistList(tournament.players) }}
+								</td>
+								<td class="py-3 px-6 text-center font-bold text-blue-500">
+									{{ tournament.mvpName ?? '-' }}
+								</td>
+								<td class="py-3 px-6 text-center font-bold">
+									{{
+										tournament.wins === 0 && tournament.wins === 0
+											? `-`
+											: `Rank ${computeRank(tournament.wins)}`
+									}}
+								</td>
+								<td class="py-4 px-6 text-center">
+									<div class="flex justify-center space-x-2">
+										<!-- 詳細ボタン -->
+										<button
+											class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+											@click="navigateToDetail(tournament.tournamentId)"
+										>
+											詳細
+										</button>
 
-								<!-- 削除ボタン -->
-								<button
-									class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
-									@click="handleDeleteTournament(tournament.tournamentId)"
-								>
-									削除
-								</button>
-							</div>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+										<!-- 削除ボタン -->
+										<button
+											class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+											@click="handleDeleteTournament(tournament.tournamentId)"
+										>
+											削除
+										</button>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
