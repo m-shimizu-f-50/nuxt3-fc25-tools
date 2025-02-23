@@ -17,6 +17,7 @@ router.get('/', (req, res) => {
       p.id AS player_id,
       p.name AS player_name,
       SUM(p.total_goals) AS total_goals,
+			SUM(p.total_assists) AS total_assists,
       mvp.name AS mvp_name
     FROM
       tournaments t
@@ -54,6 +55,7 @@ router.get('/', (req, res) => {
 					playerId: row.player_id, // UUIDをそのまま使用
 					playerName: row.player_name,
 					totalGoals: Number(row.total_goals) || 0,
+					totalAssists: Number(row.total_assists) || 0,
 				});
 			}
 		});
