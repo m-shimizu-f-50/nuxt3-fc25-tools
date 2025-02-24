@@ -420,4 +420,53 @@ router.delete('/:id', (req, res) => {
 	});
 });
 
+/*
+ * 最新の大会の選手情報を取得するAPI
+ * GET /tournaments/latest/players
+ */
+router.get('/latest/players', (req, res) => {
+	const query = `
+    SELECT 
+      p.name,
+      p.position,
+      p.team,
+      p.is_starter
+    FROM tournaments t
+    JOIN players p ON t.id = p.tournament_id
+    WHERE t.id = (
+      SELECT id
+      FROM tournaments
+      ORDER BY start_date DESC, created_at DESC
+      LIMIT 1
+    )
+    ORDER BY p.is_starter DESC, 
+      CASE p.position
+        WHEN 'GK' THEN 1
+        WHEN 'DF' THEN 2
+        WHEN 'MF' THEN 3
+        WHEN 'FW' THEN 4
+      END;
+  `;
+
+	db.query(query, (err, results) => {
+		if (err) {
+			console.error('選手情報取得エラー:', err);
+			return res.status(500).json({ error: '選手情報取得エラー' });
+		}
+
+		if (results.length === 0) {
+			return res.status(404).json({ message: '選手情報が見つかりません' });
+		}
+
+		const players = results.map(row => ({
+			name: row.name,
+			position: row.position,
+			team: row.team,
+			isStarter: !!row.is_starter
+		}));
+
+		res.status(200).json(players);
+	});
+});
+
 module.exports = router;

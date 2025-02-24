@@ -266,6 +266,41 @@ const formErrors = ref<{
 	players: [], // 初期値として空配列を設定
 });
 
+// 前回の選手情報を取得する関数を追加
+const fetchLatestPlayers = async () => {
+	try {
+		const response = await axios.get(API_ENDPOINTS.TOURNAMENTS.LATEST_PLAYERS);
+		const latestPlayers = response.data;
+
+		// 既存のplayersをクリア
+		while (players.value.length) {
+			remove(0);
+		}
+
+		// 取得した選手情報を追加
+		latestPlayers.forEach((player: Player) => {
+			push({
+				name: player.name,
+				position: player.position,
+				team: player.team,
+				isStarter: player.isStarter,
+			});
+		});
+
+		// 選手を整頓(ポジション順、スタメン優先)
+		arrangementPlayer();
+
+		alert('前回の選手情報を読み込みました');
+	} catch (error) {
+		console.error('選手情報取得エラー:', error);
+		if ((error as any).response?.status === 404) {
+			alert('前回の選手情報が見つかりませんでした');
+		} else {
+			alert('選手情報の取得に失敗しました');
+		}
+	}
+};
+
 // 送信ボタン
 const submitForm = handleSubmit(async (values) => {
 	// エラーをリセット
@@ -366,9 +401,35 @@ const submitForm = handleSubmit(async (values) => {
 
 				<!-- 選手一覧 -->
 				<div>
-					<label class="block text-sm font-medium text-gray-700"
-						>選手一覧</label
-					>
+					<div class="flex justify-between items-center mb-4">
+						<label class="block text-sm font-medium text-gray-700"
+							>選手一覧</label
+						>
+						<div class="space-x-2">
+							<button
+								type="button"
+								@click="fetchLatestPlayers"
+								class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+							>
+								前回の選手をコピー
+							</button>
+							<button
+								type="button"
+								@click="addPlayer"
+								class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+								:disabled="players.length >= 18"
+							>
+								選手を追加
+							</button>
+							<button
+								type="button"
+								@click="arrangementPlayer"
+								class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+							>
+								選手を整頓
+							</button>
+						</div>
+					</div>
 					<div class="mt-4 space-y-4">
 						<div
 							v-for="(player, index) in players"
@@ -432,22 +493,6 @@ const submitForm = handleSubmit(async (values) => {
 							{{ error }}
 						</p>
 					</div>
-
-					<button
-						type="button"
-						@click="addPlayer"
-						class="mt-4 mr-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-						:disabled="players.length >= 18"
-					>
-						選手を追加
-					</button>
-					<button
-						type="button"
-						@click="arrangementPlayer"
-						class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-					>
-						選手を整頓
-					</button>
 				</div>
 
 				<!-- 送信ボタン -->
