@@ -287,9 +287,6 @@ const fetchLatestPlayers = async () => {
 			});
 		});
 
-		// 選手を整頓(ポジション順、スタメン優先)
-		arrangementPlayer();
-
 		alert('前回の選手情報を読み込みました');
 	} catch (error) {
 		console.error('選手情報取得エラー:', error);

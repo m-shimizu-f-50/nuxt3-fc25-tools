@@ -208,6 +208,13 @@ router.get('/:id', async (req, res) => {
     FROM tournaments t
     LEFT JOIN players p ON t.id = p.tournament_id
     WHERE t.id = ?
+		ORDER BY p.is_starter DESC,
+      CASE p.position
+        WHEN 'FW' THEN 1
+        WHEN 'MF' THEN 2
+        WHEN 'DF' THEN 3
+        WHEN 'GK' THEN 4
+      END;
   `;
 
 	db.query(query, [tournamentId], (err, results) => {
@@ -341,6 +348,13 @@ router.put('/:id', (req, res) => {
         FROM tournaments t
         LEFT JOIN players p ON t.id = p.tournament_id
         WHERE t.id = ?
+				ORDER BY p.is_starter DESC,
+				CASE p.position
+					WHEN 'FW' THEN 1
+					WHEN 'MF' THEN 2
+					WHEN 'DF' THEN 3
+					WHEN 'GK' THEN 4
+				END;
       `;
 
 				db.query(selectQuery, [tournamentId], (err, results) => {
@@ -439,12 +453,12 @@ router.get('/latest/players', (req, res) => {
       ORDER BY start_date DESC, created_at DESC
       LIMIT 1
     )
-    ORDER BY p.is_starter DESC, 
+    ORDER BY p.is_starter DESC,
       CASE p.position
-        WHEN 'GK' THEN 1
-        WHEN 'DF' THEN 2
-        WHEN 'MF' THEN 3
-        WHEN 'FW' THEN 4
+        WHEN 'FW' THEN 1
+        WHEN 'MF' THEN 2
+        WHEN 'DF' THEN 3
+        WHEN 'GK' THEN 4
       END;
   `;
 
@@ -458,11 +472,11 @@ router.get('/latest/players', (req, res) => {
 			return res.status(404).json({ message: '選手情報が見つかりません' });
 		}
 
-		const players = results.map(row => ({
+		const players = results.map((row) => ({
 			name: row.name,
 			position: row.position,
 			team: row.team,
-			isStarter: !!row.is_starter
+			isStarter: !!row.is_starter,
 		}));
 
 		res.status(200).json(players);
