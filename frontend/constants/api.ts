@@ -8,5 +8,6 @@ export const API_ENDPOINTS = {
 		DETAIL: (id: string) => `${BASE_URL}/api/tournaments/${id}`,
 		UPDATE: (id: string) => `${BASE_URL}/api/tournaments/${id}`,
 		DELETE: (id: string) => `${BASE_URL}/api/tournaments/${id}`,
+		LATEST_PLAYERS: `${BASE_URL}/api/tournaments/latest/players`,
 	},
 } as const;

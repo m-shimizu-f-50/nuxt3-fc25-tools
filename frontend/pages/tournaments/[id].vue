@@ -41,14 +41,14 @@ const toggleEditMode = () => {
 			// 編集内容を元に戻す
 			editableTournament.value = JSON.parse(JSON.stringify(tournament.value));
 			// 表示用の選手データを更新
-			displayPlayers.value = sortPlayers(tournament.value?.players) || [];
+			displayPlayers.value = tournament.value?.players || [];
 		}
 	} else {
 		isEditing.value = true;
 		// 編集用のデータを複製
 		editableTournament.value = JSON.parse(JSON.stringify(tournament.value));
 		// 表示用の選手データを更新
-		displayPlayers.value = sortPlayers(editableTournament.value?.players) || [];
+		displayPlayers.value = editableTournament.value?.players || [];
 	}
 };
 
@@ -60,8 +60,7 @@ const handleUpdate = async () => {
 		// 通信中フラグを立てる
 		isSaving.value = true;
 
-		// 更新前にプレイヤーをソート
-		displayPlayers.value = sortPlayers(displayPlayers.value);
+		// 表示用の選手データを編集用のデータに反映
 		editableTournament.value.players = displayPlayers.value;
 
 		// 日付をYYYY-MM-DD形式に変換
@@ -131,7 +130,9 @@ const handleUpdate = async () => {
 		);
 
 		tournament.value = response.data;
-		displayPlayers.value = sortPlayers(response.data.players);
+		if (tournament.value?.players) {
+			displayPlayers.value = tournament.value.players;
+		}
 		isEditing.value = false;
 		alert('更新が完了しました');
 	} catch (error) {
@@ -152,8 +153,6 @@ const fetchTournament = async () => {
 		tournament.value = data;
 
 		if (tournament.value?.players) {
-			// プレイヤーをポジションとスターター状態でソート
-			tournament.value.players = sortPlayers(tournament.value.players);
 			displayPlayers.value = tournament.value.players;
 		}
 	} catch (error) {
