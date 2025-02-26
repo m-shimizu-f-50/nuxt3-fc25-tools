@@ -20,6 +20,7 @@ interface Tournament {
 }
 
 const tournaments = ref<Tournament[]>([]);
+const sortOrder = ref<'desc' | 'asc'>('desc'); // 並び替えの順序を管理
 
 // 大会一覧を取得する関数
 const fetchTournaments = async () => {
@@ -28,9 +29,27 @@ const fetchTournaments = async () => {
 		const data = await response.json();
 		tournaments.value = data;
 		console.log('大会一覧:', tournaments.value);
+		// 初期状態でも並び替えを適用
+		sortTournaments();
 	} catch (error) {
 		console.error('大会一覧取得エラー:', error);
 	}
+};
+
+// 並び替えの順序を変更する関数
+const handleSortChange = (event: Event) => {
+	const target = event.target as HTMLSelectElement;
+	sortOrder.value = target.value as 'desc' | 'asc';
+	sortTournaments();
+};
+
+// 大会を並び替える関数
+const sortTournaments = () => {
+	tournaments.value.sort((a, b) => {
+		const dateA = new Date(a.startDate).getTime();
+		const dateB = new Date(b.startDate).getTime();
+		return sortOrder.value === 'desc' ? dateB - dateA : dateA - dateB;
+	});
 };
 
 // 大会を削除する関数
@@ -136,9 +155,36 @@ const navigateToDetail = (tournamentId: number) => {
 <template>
 	<div class="container mx-auto p-4">
 		<h1 class="text-2xl font-bold mb-4">CF 対戦データ</h1>
-		<div class="flex justify-end mb-4">
+		<div class="flex justify-between items-center mb-4">
+			<!-- 並び替えセレクトボックス -->
+			<div class="relative">
+				<label class="inline-flex items-center space-x-2">
+					<span class="text-sm font-medium text-gray-700">並び替え：</span>
+					<div class="relative">
+						<select
+							v-model="sortOrder"
+							@change="handleSortChange"
+							class="appearance-none bg-white pl-3 pr-10 py-2 text-sm leading-5 rounded-lg border border-gray-300 
+							focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+							hover:border-gray-400 transition-colors duration-200
+							shadow-sm"
+						>
+							<option value="desc">新しい順</option>
+							<option value="asc">古い順</option>
+						</select>
+						<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+							<svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+							</svg>
+						</div>
+					</div>
+				</label>
+			</div>
+			<!-- 新規登録ボタン -->
 			<button
-				class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+				class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 
+				focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+				shadow-sm"
 				@click="$router.push('/tournaments/create')"
 			>
 				新規登録
