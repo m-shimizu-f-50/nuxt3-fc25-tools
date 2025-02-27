@@ -194,6 +194,20 @@ const winRate = computed(() => {
 	return total === 0 ? 0 : Math.round((tournament.value.wins / total) * 100);
 });
 
+// 大会が終了しているかどうかを判定するcomputed
+const isTournamentFinished = computed(() => {
+	if (!tournament.value?.startDate) return false;
+	
+	const tournamentDate = new Date(tournament.value.startDate);
+	const currentDate = new Date();
+	
+	// 大会開始日から4日後の日付を計算
+	const finishDate = new Date(tournamentDate);
+	finishDate.setDate(finishDate.getDate() + 4);
+	
+	return currentDate > finishDate;
+});
+
 onMounted(() => {
 	fetchTournament();
 });
@@ -208,29 +222,39 @@ onMounted(() => {
 			>
 				<h1 class="text-3xl font-bold text-gray-900">大会詳細</h1>
 				<div class="flex space-x-4">
-					<button
-						v-if="!isEditing"
-						@click="toggleEditMode"
-						class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
-					>
-						編集する
-					</button>
-					<div v-else class="flex space-x-2">
+					<template v-if="!isTournamentFinished">
 						<button
-							@click="handleUpdate"
-							:disabled="isSaving"
-							class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-						>
-							{{ isSaving ? '更新中...' : '更新する' }}
-						</button>
-						<button
+							v-if="!isEditing"
 							@click="toggleEditMode"
-							:disabled="isSaving"
-							class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+							class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
 						>
-							キャンセル
+							編集する
 						</button>
-					</div>
+						<div v-else class="flex space-x-2">
+							<button
+								@click="handleUpdate"
+								:disabled="isSaving"
+								class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+							>
+								{{ isSaving ? '更新中...' : '更新する' }}
+							</button>
+							<button
+								@click="toggleEditMode"
+								:disabled="isSaving"
+								class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+							>
+								キャンセル
+							</button>
+						</div>
+					</template>
+					<template v-else>
+						<button
+							disabled
+							class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-400 cursor-not-allowed"
+						>
+							CF終了
+						</button>
+					</template>
 					<NuxtLink
 						to="/tournaments"
 						class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
