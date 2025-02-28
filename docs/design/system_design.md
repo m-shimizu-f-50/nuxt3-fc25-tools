@@ -24,32 +24,47 @@ Nuxt3 + Node.js の学習目的も兼ねており、段階的に機能を拡張�
 #### 2.1.1 対戦データ一覧表示
 
 - 登録された対戦データを一覧形式で表示
-- ソート機能
-- フィルター機能
+- 日付による昇順/降順ソート機能
+- 上位3名の得点者/アシスト提供者の表示
+- 大会の勝率表示
+- MVP選手の表示
+- 大会の状態表示（進行中/終了）
 
 #### 2.1.2 対戦データ登録
 
 - 新規ボタンからデータ登録画面へ遷移
 - 必要項目の入力フォーム
 - バリデーション機能
+- 前回の選手データコピー機能
+- 選手の自動整頓機能（ポジション、スターター状態による並び替え）
 
 #### 2.1.3 対戦データ編集
 
 - 一覧から詳細画面への遷移
-- データの編集機能
+- データの編集機能（大会終了前のみ）
 - 削除機能
+- 大会終了の自動判定（開始日から4日後）
 
 ### 2.2 今後の拡張機能（予定）
 
-- （追加予定の機能をここに記載）
+- 試合データの詳細管理
+- 選手統計機能
+- チーム分析機能
 
 ## 3. 画面設計
 
 ### 3.1 画面一覧
 
 1. 対戦データ一覧画面
+   - 日付ソート機能
+   - 大会状態表示
+   - 得点/アシスト上位表示
 2. 対戦データ登録画面
+   - 前回選手コピー機能
+   - 選手整頓機能
 3. 対戦データ詳細/編集画面
+   - 大会終了判定による編集制御
+   - MVP選手選択
 
 ### 3.2 画面遷移図
 
@@ -60,6 +75,7 @@ graph TD
     A --> C[詳細/編集画面]
     B --> A
     C --> A
+    B -- "前回選手コピー" --> B
 ```
 
 ## 4. データモデル設計
@@ -69,11 +85,11 @@ graph TD
 #### テーブル構成の概要
 
 1. **tournaments（大会）テーブル**
-
    - 大会の基本情報を管理
    - ID は VARCHAR(36)形式で、UUID を使用
    - 勝敗数は集計値として保持（wins, losses）
    - MVP プレイヤーは選手テーブルを参照
+   - 開始日から4日後を大会終了日として扱う
 
 2. **players（選手）テーブル**
    - 大会に紐づく選手情報を管理
@@ -159,16 +175,15 @@ ALTER TABLE tournaments
 ```typescript
 // 大会データ
 interface Tournament {
-	tournamentId: number;
-	startDate: string; // 開始日
-	wins: number; // 勝ち数
-	losses: number; // 負け数
-	mvpName: string; // MVP選手
-	players: {
-		playerId: number;
-		playerName: string;
-		totalGoals: number;
-	}[];
+    tournamentId: string;
+    startDate: string; // 開始日
+    wins: number; // 勝ち数
+    losses: number; // 負け数
+    mvpPlayerId?: string; // MVP選手ID
+    comment?: string;
+    players: Player[];
+    createdAt: string;
+    updatedAt: string;
 }
 
 // ポジション定義
@@ -176,16 +191,16 @@ type Position = 'GK' | 'DF' | 'MF' | 'FW';
 
 // 大会選手データ
 interface Player {
-	id: string;
-	tournamentId: string;
-	name: string;
-	position: Position; // 型を限定
-	team: string;
-	goals: number;
-	assists: number;
-	isStarter: boolean;
-	createdAt: Date;
-	updatedAt: Date;
+    id: string;
+    tournamentId: string;
+    name: string;
+    position: Position;
+    team: string;
+    totalGoals: number;
+    totalAssists: number;
+    isStarter: boolean;
+    createdAt: string;
+    updatedAt: string;
 }
 ```
 
@@ -217,6 +232,10 @@ interface Player {
     - 登録済みの選手のみ選択可
     - 大会終了後に設定可能
 
+- 大会編集時：
+  - 開始日から4日後以降は編集不可
+  - 大会終了後はMVP選手の設定のみ可能
+
 ## 5. API 設計
 
 ### 5.1 エンドポイント一覧
@@ -229,79 +248,90 @@ interface Player {
 - POST /api/tournaments/:id/matches - 大会試合登録
 - GET /api/matches/:id - 試合詳細取得
 - PUT /api/matches/:id - 試合情報更新（選手成績を含む）
+- GET /api/tournaments/latest/players - 最新の大会の選手情報取得
 
 ### 5.2 リクエスト/レスポンス例
 
 ```typescript
 // 大会更新リクエスト
 interface UpdateTournamentRequest {
-	name: string;
-	startDate: string; // ISO 8601形式
-	comment?: string;
-	mvpPlayerId?: string;
-	players: {
-		id?: string; // 既存選手の場合はID必須
-		name: string;
-		position: 'GK' | 'DF' | 'MF' | 'FW';
-		team: string;
-		isStarter: boolean;
-	}[];
+    name: string;
+    startDate: string; // ISO 8601形式
+    comment?: string;
+    mvpPlayerId?: string;
+    players: {
+        id?: string; // 既存選手の場合はID必須
+        name: string;
+        position: 'GK' | 'DF' | 'MF' | 'FW';
+        team: string;
+        isStarter: boolean;
+    }[];
 }
 
 // 試合更新リクエスト
 interface UpdateMatchRequest {
-	matchDate: string; // ISO 8601形式
-	opponent: string;
-	result: 'win' | 'lose' | 'draw';
-	scoreFor: number;
-	scoreAgainst: number;
-	performances: {
-		playerId: string;
-		goals: number;
-		assists: number;
-		playedAsStarter: boolean;
-	}[];
+    matchDate: string; // ISO 8601形式
+    opponent: string;
+    result: 'win' | 'lose' | 'draw';
+    scoreFor: number;
+    scoreAgainst: number;
+    performances: {
+        playerId: string;
+        goals: number;
+        assists: number;
+        playedAsStarter: boolean;
+    }[];
 }
 
 // 大会詳細レスポンス
 interface TournamentResponse {
-	id: string;
-	name: string;
-	startDate: string; // ISO 8601形式
-	comment?: string;
-	mvpPlayer?: {
-		id: string;
-		name: string;
-		position: string;
-		team: string;
-		goals: number;
-		assists: number;
-	};
-	players: {
-		id: string;
-		name: string;
-		position: string;
-		team: string;
-		goals: number;
-		assists: number;
-		isStarter: boolean;
-	}[];
-	matches: {
-		id: string;
-		matchDate: string;
-		opponent: string;
-		result: 'win' | 'lose' | 'draw';
-		scoreFor: number;
-		scoreAgainst: number;
-		performances: {
-			playerId: string;
-			goals: number;
-			assists: number;
-			playedAsStarter: boolean;
-		}[];
-	}[];
-	createdAt: string;
-	updatedAt: string;
+    id: string;
+    name: string;
+    startDate: string; // ISO 8601形式
+    comment?: string;
+    mvpPlayer?: {
+        id: string;
+        name: string;
+        position: string;
+        team: string;
+        goals: number;
+        assists: number;
+    };
+    players: {
+        id: string;
+        name: string;
+        position: string;
+        team: string;
+        goals: number;
+        assists: number;
+        isStarter: boolean;
+    }[];
+    matches: {
+        id: string;
+        matchDate: string;
+        opponent: string;
+        result: 'win' | 'lose' | 'draw';
+        scoreFor: number;
+        scoreAgainst: number;
+        performances: {
+            playerId: string;
+            goals: number;
+            assists: number;
+            playedAsStarter: boolean;
+        }[];
+    }[];
+    createdAt: string;
+    updatedAt: string;
+}
+
+// 最新選手情報レスポンス
+interface LatestPlayersResponse {
+    players: {
+        name: string;
+        position: Position;
+        team: string;
+        isStarter: boolean;
+    }[];
 }
 ```
 
