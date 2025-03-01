@@ -211,6 +211,7 @@ interface Player {
     - 必須
     - 今日以降の日付のみ選択可能
     - YYYY-MM-DD 形式で保存
+    - 日付はJST（日本時間）として扱う
   - コメント: 任意
   - 選手登録（18 名必須）:
     - 名前:
@@ -233,6 +234,11 @@ interface Player {
     - 大会終了後に設定可能
 
 - 大会編集時：
+  - 開始日:
+    - 必須
+    - YYYY-MM-DD形式で保存
+    - 日付はJST（日本時間）として扱う
+    - 更新時は元の日付より過去日付への変更は不可
   - 開始日から4日後以降は編集不可
   - 大会終了後はMVP選手の設定のみ可能
 
@@ -256,17 +262,31 @@ interface Player {
 // 大会更新リクエスト
 interface UpdateTournamentRequest {
     name: string;
-    startDate: string; // ISO 8601形式
+    startDate: string; // 'YYYY-MM-DD'形式（JST）
     comment?: string;
     mvpPlayerId?: string;
     players: {
-        id?: string; // 既存選手の場合はID必須
+        id?: string;
         name: string;
         position: 'GK' | 'DF' | 'MF' | 'FW';
         team: string;
         isStarter: boolean;
     }[];
 }
+
+// 日付処理に関する補足
+/**
+ * 日付の取り扱いについて
+ * 1. フロントエンド側での日付送信時：
+ *    - 'YYYY-MM-DD'形式の文字列として送信
+ *    - 日付はJST（日本時間）として扱う
+ * 2. バックエンド側での日付処理：
+ *    - 受け取った日付文字列をMySQLのDATE型として保存
+ *    - タイムゾーンの変換は行わない
+ * 3. フロントエンド側での日付表示時：
+ *    - 受け取った日付をJST（日本時間）として解釈
+ *    - 必要に応じてフォーマット変換を行う
+ */
 
 // 試合更新リクエスト
 interface UpdateMatchRequest {
