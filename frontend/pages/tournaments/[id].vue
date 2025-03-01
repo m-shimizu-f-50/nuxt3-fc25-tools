@@ -62,12 +62,6 @@ const handleUpdate = async () => {
 
 		// 表示用の選手データを編集用のデータに反映
 		editableTournament.value.players = displayPlayers.value;
-
-		// 日付をYYYY-MM-DD形式に変換
-		const formatDate = (dateString: string) => {
-			const date = new Date(dateString);
-			return date.toISOString().split('T')[0]; // 'YYYY-MM-DD'形式に変換
-		};
 		const formattedStartDate = formatDate(editableTournament.value.startDate);
 
 		// バリデーション
@@ -163,12 +157,13 @@ const fetchTournament = async () => {
 };
 
 // 日付データをフォーマット
-const formatDate = (isoDate: string | undefined | null) => {
-	if (!isoDate) return '';
-	const dateObj = new Date(isoDate);
-	const year = dateObj.getUTCFullYear();
-	const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
-	const day = String(dateObj.getUTCDate()).padStart(2, '0');
+// 日付をJSTとして処理し、YYYY-MM-DD形式に変換
+const formatDate = (dateString: string | undefined) => {
+	if (!dateString) return '';
+	const date = new Date(dateString);
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, '0');
 	return `${year}-${month}-${day}`;
 };
 
@@ -197,14 +192,14 @@ const winRate = computed(() => {
 // 大会が終了しているかどうかを判定するcomputed
 const isTournamentFinished = computed(() => {
 	if (!tournament.value?.startDate) return false;
-	
+
 	const tournamentDate = new Date(tournament.value.startDate);
 	const currentDate = new Date();
-	
+
 	// 大会開始日から4日後の日付を計算
 	const finishDate = new Date(tournamentDate);
 	finishDate.setDate(finishDate.getDate() + 4);
-	
+
 	return currentDate > finishDate;
 });
 
