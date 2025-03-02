@@ -154,123 +154,124 @@ const navigateToDetail = (tournamentId: number) => {
 
 <template>
 	<div class="container mx-auto p-4">
-		<h1 class="text-2xl font-bold mb-4">CF 対戦データ</h1>
-		<div class="flex justify-between items-center mb-4">
-			<!-- 並び替えセレクトボックス -->
-			<div class="relative">
-				<label class="inline-flex items-center space-x-2">
-					<span class="text-sm font-medium text-gray-700">並び替え：</span>
-					<div class="relative">
-						<select
-							v-model="sortOrder"
-							@change="handleSortChange"
-							class="appearance-none bg-white pl-3 pr-10 py-2 text-sm leading-5 rounded-lg border border-gray-300 
-							focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
-							hover:border-gray-400 transition-colors duration-200
-							shadow-sm"
-						>
-							<option value="desc">新しい順</option>
-							<option value="asc">古い順</option>
-						</select>
-						<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-							<svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-							</svg>
-						</div>
-					</div>
-				</label>
+		<div class="flex justify-between items-center mb-6">
+			<h1 class="text-2xl font-bold text-gray-900">CF 対戦データ</h1>
+			
+			<!-- 操作エリア -->
+			<div class="flex items-center space-x-6">
+				<!-- 並び替えセレクトボックス -->
+				<div class="flex items-center space-x-4">
+					<label class="text-sm font-medium text-gray-700">並び替え：</label>
+					<select
+						v-model="sortOrder"
+						@change="handleSortChange"
+						class="block w-40 rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 text-sm leading-6"
+					>
+						<option value="desc">新しい順</option>
+						<option value="asc">古い順</option>
+					</select>
+				</div>
+
+				<!-- 新規登録ボタン -->
+				<button
+					@click="$router.push('/tournaments/create')"
+					class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-600 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+				>
+					新規登録
+				</button>
 			</div>
-			<!-- 新規登録ボタン -->
-			<button
-				class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 
-				focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-				shadow-sm"
-				@click="$router.push('/tournaments/create')"
-			>
-				新規登録
-			</button>
 		</div>
 
-		<!-- ローディング表示 -->
-		<div v-if="!tournaments.length" class="text-center py-12">
-			<div class="text-gray-500">データを読み込み中...</div>
-		</div>
-		<div v-else class="overflow-x-auto">
-			<div class="inline-block min-w-full">
-				<div class="overflow-hidden">
-					<table class="min-w-full bg-white shadow-md rounded-lg">
-						<thead
-							class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal whitespace-nowrap"
-						>
-							<tr>
-								<th class="py-3 px-6 text-left">対戦日時</th>
-								<th class="py-3 px-6 text-center">勝敗 (15試合)</th>
-								<th class="py-3 px-6 text-center">総得点</th>
-								<th class="py-3 px-6 text-center min-w-[200px]">
-									ゴール(上位３名)
+		<!-- テーブル -->
+		<div class="mt-4 flow-root bg-white rounded-lg shadow">
+			<div class="overflow-x-auto">
+				<div class="inline-block min-w-full">
+					<table class="min-w-full">
+						<thead>
+							<tr class="border-b border-gray-200 bg-gray-50">
+								<th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">対戦日時</th>
+								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">勝敗 (15試合)</th>
+								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 min-w-[100px]">総得点</th>
+								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">ゴール(上位３名)</th>
+								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">アシスト(上位３名)</th>
+								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">MVP</th>
+								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">ランク</th>
+								<th scope="col" class="relative py-3.5 pl-3 pr-4">
+									<span class="sr-only">操作</span>
 								</th>
-								<th class="py-3 px-6 text-center min-w-[200px]">
-									アシスト(上位３名)
-								</th>
-								<th class="py-3 px-6 text-center">MVP</th>
-								<th class="py-3 px-6 text-center">ランク</th>
-								<th class="py-3 px-6 text-center">詳細</th>
 							</tr>
 						</thead>
-						<tbody class="text-gray-700">
+						<tbody>
 							<tr
-								v-for="tournament in tournaments"
+								v-for="(tournament, index) in tournaments"
 								:key="tournament.tournamentId"
-								class="border-b whitespace-nowrap hover:bg-gray-50"
+								:class="[
+									index === tournaments.length - 1 ? '' : 'border-b border-gray-100',
+									'hover:bg-gray-50 transition-colors duration-200'
+								]"
 							>
-								<td class="py-3 px-6">
-									{{ formatDate(tournament.startDate) }}
+								<td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm">
+									<span class="font-medium text-gray-900">{{ formatDate(tournament.startDate) }}</span>
 								</td>
-								<td class="py-3 px-6 text-center">
-									<div class="flex justify-center">
-										{{ tournament.wins }}勝 / {{ tournament.losses }}敗 ({{
-											computeWinRate(tournament.wins, tournament.losses)
-										}})
+								<td class="whitespace-nowrap px-3 py-4 text-sm">
+									<div class="flex items-center space-x-2">
+										<span class="font-medium text-gray-900">
+											{{ tournament.wins }}勝{{ tournament.losses }}敗
+										</span>
+										<div class="flex items-center">
+											<div class="h-1 w-16 bg-gray-100 rounded-full overflow-hidden">
+												<div
+													class="h-full bg-green-400 transition-all duration-300"
+													:style="{
+														width: `${computeWinRate(tournament.wins, tournament.losses)}`,
+													}"
+												></div>
+											</div>
+											<span class="ml-2 text-xs text-gray-500">
+												{{ computeWinRate(tournament.wins, tournament.losses) }}
+											</span>
+										</div>
 									</div>
 								</td>
-								<td class="py-3 px-6 text-center">
-									{{
-										tournament.players.reduce(
-											(acc, player) => acc + player.totalGoals,
-											0
-										)
-									}}
+								<td class="whitespace-nowrap px-3 py-4 text-sm text-center min-w-[100px]">
+									<span class="text-gray-900">
+										{{
+											tournament.players.reduce(
+												(acc, player) => acc + player.totalGoals,
+												0
+											)
+										}}
+									</span>
 								</td>
-								<td class="py-3 px-6 text-center">
-									{{ formatScorersList(tournament.players) }}
+								<td class="whitespace-nowrap px-3 py-4 text-sm">
+									<span class="text-gray-900">{{ formatScorersList(tournament.players) }}</span>
 								</td>
-								<td class="py-3 px-6 text-center">
-									{{ formatAssistList(tournament.players) }}
+								<td class="whitespace-nowrap px-3 py-4 text-sm">
+									<span class="text-gray-900">{{ formatAssistList(tournament.players) }}</span>
 								</td>
-								<td class="py-3 px-6 text-center font-bold text-blue-500">
-									{{ tournament.mvpName ?? '-' }}
+								<td class="whitespace-nowrap px-3 py-4 text-sm">
+									<span class="font-medium text-blue-500">{{ tournament.mvpName ?? '-' }}</span>
 								</td>
-								<td class="py-3 px-6 text-center font-bold">
-									{{
-										tournament.wins === 0 && tournament.wins === 0
-											? `-`
-											: `Rank ${computeRank(tournament.wins)}`
-									}}
+								<td class="whitespace-nowrap px-3 py-4 text-sm">
+									<span class="font-medium text-gray-900">
+										{{
+											tournament.wins === 0 && tournament.losses === 0
+												? `-`
+												: `Rank ${computeRank(tournament.wins)}`
+										}}
+									</span>
 								</td>
-								<td class="py-4 px-6 text-center">
-									<div class="flex justify-center space-x-2">
-										<!-- 詳細ボタン -->
+								<td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm">
+									<div class="flex justify-end space-x-2">
 										<button
-											class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
 											@click="navigateToDetail(tournament.tournamentId)"
+											class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-600 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
 										>
 											詳細
 										</button>
-
-										<!-- 削除ボタン -->
 										<button
-											class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
 											@click="handleDeleteTournament(tournament.tournamentId)"
+											class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
 										>
 											削除
 										</button>
