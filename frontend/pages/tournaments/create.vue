@@ -7,6 +7,7 @@ import * as yup from 'yup';
 import axios from 'axios';
 import { API_ENDPOINTS } from '~/constants/api';
 import type { Router } from 'vue-router';
+import { useToast } from 'vue-toastification';
 
 interface Player {
 	name: string;
@@ -21,6 +22,7 @@ interface FormData {
 }
 
 const router: Router = useRouter();
+const toast = useToast();
 
 // 今日の日付を取得（時刻は00:00:00に設定）
 const today = new Date();
@@ -287,7 +289,7 @@ const fetchLatestPlayers = async () => {
 			});
 		});
 
-		alert('前回の選手情報を読み込みました');
+		toast.success('前回の選手情報を読み込みました');
 	} catch (error) {
 		console.error('選手情報取得エラー:', error);
 		if ((error as any).response?.status === 404) {
@@ -362,6 +364,7 @@ const submitForm = handleSubmit(async (values) => {
 			})),
 		});
 		console.log('登録成功:', response.data);
+		toast.success('大会を登録しました');
 		// 一覧画面へ遷移
 		router.push('/tournaments');
 	} catch (error) {
