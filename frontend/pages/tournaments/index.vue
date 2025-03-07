@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { API_ENDPOINTS } from '~/constants/api';
 import { formatDate } from '~/utils/date';
 import axios from 'axios';
+import { useToast } from 'vue-toastification';
 import type { Router } from 'vue-router';
 
 interface Tournament {
@@ -19,6 +20,7 @@ interface Tournament {
 	}[];
 }
 
+const toast = useToast();
 const tournaments = ref<Tournament[]>([]);
 const sortOrder = ref<'desc' | 'asc'>('desc'); // 並び替えの順序を管理
 
@@ -54,7 +56,6 @@ const sortTournaments = () => {
 
 // 大会を削除する関数
 const handleDeleteTournament = async (tournamentId: number) => {
-	console.log('削除対象の大会ID:', tournamentId);
 	// 削除確認
 	if (
 		!confirm(
@@ -66,7 +67,7 @@ const handleDeleteTournament = async (tournamentId: number) => {
 
 	try {
 		await axios.delete(API_ENDPOINTS.TOURNAMENTS.DELETE(String(tournamentId)));
-		alert('大会を削除しました');
+		toast.success('大会を削除しました');
 		// 削除成功後、該当の大会を配列から削除(フロント側でも削除)
 		tournaments.value = tournaments.value.filter(
 			(tournament) => tournament.tournamentId !== tournamentId
@@ -75,7 +76,7 @@ const handleDeleteTournament = async (tournamentId: number) => {
 		router.push('/tournaments');
 	} catch (err) {
 		console.error('Error deleting tournament:', err);
-		alert('削除に失敗しました');
+		toast.error('大会の削除に失敗しました');
 	}
 };
 
@@ -156,7 +157,7 @@ const navigateToDetail = (tournamentId: number) => {
 	<div class="container mx-auto p-4">
 		<div class="flex justify-between items-center mb-6">
 			<h1 class="text-2xl font-bold text-gray-900">CF 対戦データ</h1>
-			
+
 			<!-- 操作エリア -->
 			<div class="flex items-center space-x-6">
 				<!-- 並び替えセレクトボックス -->
@@ -189,13 +190,48 @@ const navigateToDetail = (tournamentId: number) => {
 					<table class="min-w-full">
 						<thead>
 							<tr class="border-b border-gray-200 bg-gray-50">
-								<th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">対戦日時</th>
-								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">勝敗 (15試合)</th>
-								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 min-w-[100px]">総得点</th>
-								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">ゴール(上位３名)</th>
-								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">アシスト(上位３名)</th>
-								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">MVP</th>
-								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">ランク</th>
+								<th
+									scope="col"
+									class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900"
+								>
+									対戦日時
+								</th>
+								<th
+									scope="col"
+									class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+								>
+									勝敗 (15試合)
+								</th>
+								<th
+									scope="col"
+									class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 min-w-[100px]"
+								>
+									総得点
+								</th>
+								<th
+									scope="col"
+									class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+								>
+									ゴール(上位３名)
+								</th>
+								<th
+									scope="col"
+									class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+								>
+									アシスト(上位３名)
+								</th>
+								<th
+									scope="col"
+									class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+								>
+									MVP
+								</th>
+								<th
+									scope="col"
+									class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+								>
+									ランク
+								</th>
 								<th scope="col" class="relative py-3.5 pl-3 pr-4">
 									<span class="sr-only">操作</span>
 								</th>
@@ -206,12 +242,16 @@ const navigateToDetail = (tournamentId: number) => {
 								v-for="(tournament, index) in tournaments"
 								:key="tournament.tournamentId"
 								:class="[
-									index === tournaments.length - 1 ? '' : 'border-b border-gray-100',
-									'hover:bg-gray-50 transition-colors duration-200'
+									index === tournaments.length - 1
+										? ''
+										: 'border-b border-gray-100',
+									'hover:bg-gray-50 transition-colors duration-200',
 								]"
 							>
 								<td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm">
-									<span class="font-medium text-gray-900">{{ formatDate(tournament.startDate) }}</span>
+									<span class="font-medium text-gray-900">{{
+										formatDate(tournament.startDate)
+									}}</span>
 								</td>
 								<td class="whitespace-nowrap px-3 py-4 text-sm">
 									<div class="flex items-center space-x-2">
@@ -219,11 +259,16 @@ const navigateToDetail = (tournamentId: number) => {
 											{{ tournament.wins }}勝{{ tournament.losses }}敗
 										</span>
 										<div class="flex items-center">
-											<div class="h-1 w-16 bg-gray-100 rounded-full overflow-hidden">
+											<div
+												class="h-1 w-16 bg-gray-100 rounded-full overflow-hidden"
+											>
 												<div
 													class="h-full bg-green-400 transition-all duration-300"
 													:style="{
-														width: `${computeWinRate(tournament.wins, tournament.losses)}`,
+														width: `${computeWinRate(
+															tournament.wins,
+															tournament.losses
+														)}`,
 													}"
 												></div>
 											</div>
@@ -233,7 +278,9 @@ const navigateToDetail = (tournamentId: number) => {
 										</div>
 									</div>
 								</td>
-								<td class="whitespace-nowrap px-3 py-4 text-sm text-center min-w-[100px]">
+								<td
+									class="whitespace-nowrap px-3 py-4 text-sm text-center min-w-[100px]"
+								>
 									<span class="text-gray-900">
 										{{
 											tournament.players.reduce(
@@ -244,13 +291,19 @@ const navigateToDetail = (tournamentId: number) => {
 									</span>
 								</td>
 								<td class="whitespace-nowrap px-3 py-4 text-sm">
-									<span class="text-gray-900">{{ formatScorersList(tournament.players) }}</span>
+									<span class="text-gray-900">{{
+										formatScorersList(tournament.players)
+									}}</span>
 								</td>
 								<td class="whitespace-nowrap px-3 py-4 text-sm">
-									<span class="text-gray-900">{{ formatAssistList(tournament.players) }}</span>
+									<span class="text-gray-900">{{
+										formatAssistList(tournament.players)
+									}}</span>
 								</td>
 								<td class="whitespace-nowrap px-3 py-4 text-sm">
-									<span class="font-medium text-blue-500">{{ tournament.mvpName ?? '-' }}</span>
+									<span class="font-medium text-blue-500">{{
+										tournament.mvpName ?? '-'
+									}}</span>
 								</td>
 								<td class="whitespace-nowrap px-3 py-4 text-sm">
 									<span class="font-medium text-gray-900">
@@ -261,7 +314,9 @@ const navigateToDetail = (tournamentId: number) => {
 										}}
 									</span>
 								</td>
-								<td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm">
+								<td
+									class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm"
+								>
 									<div class="flex justify-end space-x-2">
 										<button
 											@click="navigateToDetail(tournament.tournamentId)"
