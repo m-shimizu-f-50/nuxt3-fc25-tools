@@ -2,6 +2,7 @@
 import axios from 'axios';
 import { ref, onMounted, computed } from 'vue';
 import { API_ENDPOINTS } from '~/constants/api';
+import { useToast } from 'vue-toastification';
 
 interface Player {
 	playerId: string;
@@ -24,6 +25,7 @@ interface Tournament {
 }
 
 const route = useRoute();
+const toast = useToast();
 const tournament = ref<Tournament | null>(null); // 大会データ
 const editableTournament = ref<Tournament | null>(null); // 編集用の大会データ
 const loading = ref(true);
@@ -128,10 +130,10 @@ const handleUpdate = async () => {
 			displayPlayers.value = tournament.value.players;
 		}
 		isEditing.value = false;
-		alert('更新が完了しました');
+		toast.success('大会情報を更新しました');
 	} catch (error) {
 		console.error('Error updating tournament:', error);
-		alert('更新に失敗しました');
+		toast.success('大会情報の更新に失敗しました');
 	} finally {
 		isSaving.value = false;
 	}
