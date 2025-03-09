@@ -5,6 +5,7 @@ import { formatDate } from '~/utils/date';
 import axios from 'axios';
 import { useToast } from 'vue-toastification';
 import type { Router } from 'vue-router';
+import Breadcrumb from '~/components/Breadcrumb.vue';
 
 interface Tournament {
 	tournamentId: number;
@@ -23,6 +24,13 @@ interface Tournament {
 const toast = useToast();
 const tournaments = ref<Tournament[]>([]);
 const sortOrder = ref<'desc' | 'asc'>('desc'); // 並び替えの順序を管理
+
+// パンくずリスト
+const breadcrumbItems = [
+	{
+		name: '大会一覧',
+	},
+];
 
 // 大会一覧を取得する関数
 const fetchTournaments = async () => {
@@ -155,6 +163,8 @@ const navigateToDetail = (tournamentId: number) => {
 
 <template>
 	<div class="container mx-auto p-4">
+		<!-- パンくずリスト -->
+		<Breadcrumb :items="breadcrumbItems" />
 		<div class="flex justify-between items-center mb-6">
 			<h1 class="text-2xl font-bold text-gray-900">CF 対戦データ</h1>
 
