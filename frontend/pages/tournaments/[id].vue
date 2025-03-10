@@ -32,6 +32,17 @@ const isEditing = ref(false);
 const isSaving = ref(false);
 const displayPlayers = ref<Player[]>([]); // 表示用の選手データをrefで管理
 
+// パンくずリスト
+const breadcrumbItems = [
+	{
+		name: '大会一覧',
+		link: '/tournaments',
+	},
+	{
+		name: '大会詳細',
+	},
+];
+
 // 編集モードの切り替え
 const toggleEditMode = () => {
 	if (isEditing.value) {
@@ -210,6 +221,8 @@ onMounted(() => {
 
 <template>
 	<div class="min-h-screen bg-gray-50">
+		<!-- パンくずリスト -->
+		<Breadcrumb :items="breadcrumbItems" />
 		<!-- ヘッダー -->
 		<header class="bg-white shadow">
 			<div
