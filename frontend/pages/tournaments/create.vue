@@ -8,6 +8,7 @@ import axios from 'axios';
 import { API_ENDPOINTS } from '~/constants/api';
 import type { Router } from 'vue-router';
 import { useToast } from 'vue-toastification';
+import Breadcrumb from '~/components/Breadcrumb.vue';
 
 interface Player {
 	name: string;
@@ -23,6 +24,13 @@ interface FormData {
 
 const router: Router = useRouter();
 const toast = useToast();
+
+// パンくずリスト
+const breadcrumbItems = [
+	{
+		name: '大会登録',
+	},
+];
 
 // 今日の日付を取得（時刻は00:00:00に設定）
 const today = new Date();
@@ -376,6 +384,8 @@ const submitForm = handleSubmit(async (values) => {
 
 <template>
 	<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+		<!-- パンくずリスト -->
+		<Breadcrumb :items="breadcrumbItems" />
 		<div class="px-4 py-6 sm:px-0">
 			<h1 class="text-2xl font-semibold text-gray-900">大会登録</h1>
 			<form @submit.prevent="submitForm" class="mt-6 space-y-6">
