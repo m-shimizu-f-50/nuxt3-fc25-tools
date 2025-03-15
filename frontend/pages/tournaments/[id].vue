@@ -2,6 +2,7 @@
 import axios from 'axios';
 import { ref, onMounted, computed } from 'vue';
 import { API_ENDPOINTS } from '~/constants/api';
+import { useToast } from 'vue-toastification';
 
 interface Player {
 	playerId: string;
@@ -31,6 +32,7 @@ const error = ref<string | null>(null);
 const isEditing = ref(false);
 const isSaving = ref(false);
 const displayPlayers = ref<Player[]>([]); // 表示用の選手データをrefで管理
+const toast = useToast();
 
 // パンくずリスト
 const breadcrumbItems = [
@@ -139,10 +141,10 @@ const handleUpdate = async () => {
 			displayPlayers.value = tournament.value.players;
 		}
 		isEditing.value = false;
-		alert('更新が完了しました');
+		toast.success('大会情報を更新しました');
 	} catch (error) {
 		console.error('Error updating tournament:', error);
-		alert('更新に失敗しました');
+		toast.error('大会情報を更新できませんでした');
 	} finally {
 		isSaving.value = false;
 	}
