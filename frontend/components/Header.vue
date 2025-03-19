@@ -9,6 +9,11 @@
 							>CF対戦データ</NuxtLink
 						>
 					</li>
+					<li>
+						<NuxtLink to="/evolution" class="p-5 hover:bg-gray-400 transition"
+							>エボリューション</NuxtLink
+						>
+					</li>
 				</ul>
 			</nav>
 		</div>
