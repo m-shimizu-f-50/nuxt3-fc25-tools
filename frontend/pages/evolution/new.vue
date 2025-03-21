@@ -180,6 +180,9 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
 interface PlayerStats {
 	overall: number;
 	pace: number;
@@ -196,9 +199,10 @@ interface PlayerForm {
 	stats: PlayerStats;
 }
 
+const router = useRouter();
 const form = ref<PlayerForm>({
 	name: '',
-	position: '',
+	position: 'FW',
 	stats: {
 		overall: 50,
 		pace: 50,
@@ -210,9 +214,83 @@ const form = ref<PlayerForm>({
 	},
 });
 
-const handleSubmit = () => {
-	// TODO: APIを呼び出して選手を登録
-	console.log('登録データ:', form.value);
-	navigateTo('/evolution');
+const errors = ref<{
+	name?: string;
+	position?: string;
+	stats?: {
+		overall?: string;
+		pace?: string;
+		shooting?: string;
+		passing?: string;
+		dribbling?: string;
+		defending?: string;
+		physical?: string;
+	};
+}>({});
+
+const validateForm = (): boolean => {
+	errors.value = {};
+
+	// 名前のバリデーション
+	if (!form.value.name) {
+		errors.value.name = '選手名は必須です';
+	}
+
+	// ポジションのバリデーション
+	if (!form.value.position) {
+		errors.value.position = 'ポジションは必須です';
+	}
+
+	// ステータスのバリデーション
+	const stats = form.value.stats;
+	if (stats.overall < 50 || stats.overall > 99) {
+		errors.value.stats = { ...errors.value.stats, overall: '総合能力は50から99の間で入力してください' };
+	}
+	if (stats.pace < 50 || stats.pace > 99) {
+		errors.value.stats = { ...errors.value.stats, pace: 'スピードは50から99の間で入力してください' };
+	}
+	if (stats.shooting < 50 || stats.shooting > 99) {
+		errors.value.stats = { ...errors.value.stats, shooting: 'シュートは50から99の間で入力してください' };
+	}
+	if (stats.passing < 50 || stats.passing > 99) {
+		errors.value.stats = { ...errors.value.stats, passing: 'パスは50から99の間で入力してください' };
+	}
+	if (stats.dribbling < 50 || stats.dribbling > 99) {
+		errors.value.stats = { ...errors.value.stats, dribbling: 'ドリブルは50から99の間で入力してください' };
+	}
+	if (stats.defending < 50 || stats.defending > 99) {
+		errors.value.stats = { ...errors.value.stats, defending: 'ディフェンスは50から99の間で入力してください' };
+	}
+	if (stats.physical < 50 || stats.physical > 99) {
+		errors.value.stats = { ...errors.value.stats, physical: 'フィジカルは50から99の間で入力してください' };
+	}
+
+	return Object.keys(errors.value).length === 0;
+};
+
+const handleSubmit = async () => {
+	if (!validateForm()) {
+		return;
+	}
+
+	try {
+		const response = await fetch('/api/evolution', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(form.value),
+		});
+
+		if (!response.ok) {
+			throw new Error('登録に失敗しました');
+		}
+
+		const result = await response.json();
+		console.log('登録成功:', result);
+		router.push('/evolution');
+	} catch (error) {
+		console.error('登録エラー:', error);
+	}
 };
 </script>
