@@ -3,6 +3,7 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const tournamentsRouter = require('./routes/tournaments');
+const evolutionsRouter = require('./routes/evolutions');
 
 const app = express();
 const port = 8890;
@@ -39,6 +40,8 @@ app.use(express.json());
 
 // 大会ルート
 app.use('/api/tournaments', tournamentsRouter);
+// エボリューションルート
+app.use('/api/evolutions', evolutionsRouter);
 
 // サーバーの起動
 app.listen(port, () => {
