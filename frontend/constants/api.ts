@@ -10,4 +10,12 @@ export const API_ENDPOINTS = {
 		DELETE: (id: string) => `${BASE_URL}/api/tournaments/${id}`,
 		LATEST_PLAYERS: `${BASE_URL}/api/tournaments/latest/players`,
 	},
+	EVOLUTIONS: {
+		CREATE: `${BASE_URL}/api/evolutions/create`,
+		LIST: `${BASE_URL}/api/evolutions`,
+		DETAIL: (id: string) => `${BASE_URL}/api/evolutions/${id}`,
+		UPDATE: (id: string) => `${BASE_URL}/api/evolutions/${id}`,
+		DELETE: (id: string) => `${BASE_URL}/api/evolutions/${id}`,
+		LATEST_PLAYERS: `${BASE_URL}/api/evolutions/latest/players`,
+	},
 } as const;
