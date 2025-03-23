@@ -10,7 +10,7 @@
 						>
 					</li>
 					<li>
-						<NuxtLink to="/evolution" class="p-5 hover:bg-gray-400 transition"
+						<NuxtLink to="/evolutions" class="p-5 hover:bg-gray-400 transition"
 							>エボリューション</NuxtLink
 						>
 					</li>
