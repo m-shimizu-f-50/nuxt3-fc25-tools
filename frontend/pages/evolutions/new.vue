@@ -184,6 +184,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { API_ENDPOINTS } from '~/constants/api';
+import { useToast } from 'vue-toastification';
 
 interface PlayerStats {
 	overall: number;
@@ -202,6 +203,7 @@ interface PlayerForm {
 }
 
 const router = useRouter();
+const toast = useToast();
 const form = ref<PlayerForm>({
 	name: '',
 	position: 'FW',
@@ -300,7 +302,7 @@ const handleSubmit = async () => {
 		const response = await axios.post(API_ENDPOINTS.EVOLUTIONS.CREATE, {
 			...form.value,
 		});
-		console.log('登録成功:', response.data);
+		toast.success('エボリューション選手を登録しました');
 		// 一覧画面へ遷移
 		router.push('/evolutions');
 	} catch (error) {
