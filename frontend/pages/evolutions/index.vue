@@ -71,6 +71,9 @@
 </template>
 
 <script setup lang="ts">
+import { API_ENDPOINTS } from '~/constants/api';
+import { ref, onMounted } from 'vue';
+
 interface Player {
 	id: string;
 	name: string;
@@ -103,4 +106,22 @@ const players = ref<Player[]>([
 const formatDate = (date: string) => {
 	return new Date(date).toLocaleDateString('ja-JP');
 };
+
+const evolutionPlayers = ref<any[]>([]);
+
+// 大会一覧を取得する関数
+const fetchEvolutionPlayers = async () => {
+	try {
+		const response = await fetch(API_ENDPOINTS.EVOLUTIONS.LIST);
+		const data = await response.json();
+		evolutionPlayers.value = data;
+		console.log('エヴォリューション一覧:', evolutionPlayers.value);
+	} catch (error) {
+		console.error('エヴォリューション一覧一覧取得エラー:', error);
+	}
+};
+
+onMounted(() => {
+	fetchEvolutionPlayers();
+});
 </script>
