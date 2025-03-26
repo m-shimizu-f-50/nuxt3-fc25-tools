@@ -78,36 +78,17 @@ interface Player {
 	id: string;
 	name: string;
 	position: string;
-	trainingCount: number;
+	stats: {
+		overall: number;
+		pace: number;
+		shooting: number;
+		passing: number;
+		defending: number;
+		physical: number;
+	};
 }
 
-// モックデータ
-const players = ref<Player[]>([
-	{
-		id: '1',
-		name: '山田太郎',
-		position: 'FW',
-		trainingCount: 5,
-	},
-	{
-		id: '2',
-		name: '鈴木一郎',
-		position: 'MF',
-		trainingCount: 3,
-	},
-	{
-		id: '3',
-		name: '佐藤花子',
-		position: 'DF',
-		trainingCount: 2,
-	},
-]);
-
-const formatDate = (date: string) => {
-	return new Date(date).toLocaleDateString('ja-JP');
-};
-
-const evolutionPlayers = ref<any[]>([]);
+const evolutionPlayers = ref<Player[]>([]);
 
 // 大会一覧を取得する関数
 const fetchEvolutionPlayers = async () => {
