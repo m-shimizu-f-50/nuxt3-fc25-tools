@@ -27,7 +27,7 @@
 						<th
 							class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
 						>
-							エヴォリューション回数
+							stats
 						</th>
 						<th
 							class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -37,7 +37,7 @@
 					</tr>
 				</thead>
 				<tbody class="bg-white divide-y divide-gray-200">
-					<tr v-for="player in players" :key="player.id">
+					<tr v-for="player in evolutionPlayers" :key="player.id">
 						<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
 							{{ player.name }}
 						</td>
@@ -45,7 +45,50 @@
 							{{ player.position }}
 						</td>
 						<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-							{{ player.trainingCount }}回
+							<div class="flex items-center space-x-6">
+								<div class="flex flex-col items-center">
+									<span class="text-xs font-medium text-gray-500">OVR</span>
+									<span class="text-base font-semibold text-gray-900">{{
+										player.stats.overall
+									}}</span>
+								</div>
+								<div class="flex flex-col items-center">
+									<span class="text-xs font-medium text-gray-500">PAC</span>
+									<span class="text-base font-semibold text-gray-900">{{
+										player.stats.pace
+									}}</span>
+								</div>
+								<div class="flex flex-col items-center">
+									<span class="text-xs font-medium text-gray-500">SHO</span>
+									<span class="text-base font-semibold text-gray-900">{{
+										player.stats.shooting
+									}}</span>
+								</div>
+								<div class="flex flex-col items-center">
+									<span class="text-xs font-medium text-gray-500">PAS</span>
+									<span class="text-base font-semibold text-gray-900">{{
+										player.stats.passing
+									}}</span>
+								</div>
+								<div class="flex flex-col items-center">
+									<span class="text-xs font-medium text-gray-500">DRI</span>
+									<span class="text-base font-semibold text-gray-900">{{
+										player.stats.dribbling
+									}}</span>
+								</div>
+								<div class="flex flex-col items-center">
+									<span class="text-xs font-medium text-gray-500">DEF</span>
+									<span class="text-base font-semibold text-gray-900">{{
+										player.stats.defending
+									}}</span>
+								</div>
+								<div class="flex flex-col items-center">
+									<span class="text-xs font-medium text-gray-500">PHY</span>
+									<span class="text-base font-semibold text-gray-900">{{
+										player.stats.physical
+									}}</span>
+								</div>
+							</div>
 						</td>
 						<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
 							<div class="flex space-x-4">

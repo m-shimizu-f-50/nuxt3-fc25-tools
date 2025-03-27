@@ -15,7 +15,25 @@ router.get('/', (req, res) => {
 			});
 		}
 
-		res.json({ data: results });
+		// 結果をオブジェクトの配列に変換
+		const players = results.map(player => ({
+			id: player.id,
+			name: player.name,
+			position: player.position,
+			stats: {
+				overall: player.overall,
+				pace: player.pace,
+				shooting: player.shooting,
+				passing: player.passing,
+				dribbling: player.dribbling,
+				defending: player.defending,
+				physical: player.physical
+			},
+			createdAt: player.created_at,
+			updatedAt: player.updated_at
+		}));
+
+		res.json(players);
 	});
 });
 
@@ -31,14 +49,22 @@ router.post('/create', (req, res) => {
 			required: {
 				name: !name,
 				position: !position,
-				stats: !stats
-			}
+				stats: !stats,
+			},
 		});
 	}
 
 	// ステータス値のバリデーション
-	const statFields = ['overall', 'pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'];
-	const invalidStats = statFields.filter(field => {
+	const statFields = [
+		'overall',
+		'pace',
+		'shooting',
+		'passing',
+		'dribbling',
+		'defending',
+		'physical',
+	];
+	const invalidStats = statFields.filter((field) => {
 		const value = stats[field];
 		return value === undefined || value < 50 || value > 99;
 	});
@@ -47,7 +73,7 @@ router.post('/create', (req, res) => {
 		return res.status(400).json({
 			message: 'ステータス値が不正です',
 			invalidFields: invalidStats,
-			validRange: { min: 50, max: 99 }
+			validRange: { min: 50, max: 99 },
 		});
 	}
 
@@ -70,7 +96,7 @@ router.post('/create', (req, res) => {
 			stats.passing,
 			stats.dribbling,
 			stats.defending,
-			stats.physical
+			stats.physical,
 		],
 		(err, results) => {
 			if (err) {
@@ -140,14 +166,22 @@ router.put('/:id', (req, res) => {
 			required: {
 				name: !name,
 				position: !position,
-				stats: !stats
-			}
+				stats: !stats,
+			},
 		});
 	}
 
 	// ステータス値のバリデーション
-	const statFields = ['overall', 'pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'];
-	const invalidStats = statFields.filter(field => {
+	const statFields = [
+		'overall',
+		'pace',
+		'shooting',
+		'passing',
+		'dribbling',
+		'defending',
+		'physical',
+	];
+	const invalidStats = statFields.filter((field) => {
 		const value = stats[field];
 		return value === undefined || value < 50 || value > 99;
 	});
@@ -156,7 +190,7 @@ router.put('/:id', (req, res) => {
 		return res.status(400).json({
 			message: 'ステータス値が不正です',
 			invalidFields: invalidStats,
-			validRange: { min: 50, max: 99 }
+			validRange: { min: 50, max: 99 },
 		});
 	}
 
