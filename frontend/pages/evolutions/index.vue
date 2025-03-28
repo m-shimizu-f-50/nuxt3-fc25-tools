@@ -102,7 +102,13 @@
 									@click="navigateTo(`/evolution/${player.id}/training/new`)"
 									class="text-green-600 hover:text-green-900"
 								>
-									トレーニング
+									エボリューション
+								</button>
+								<button
+									@click="onDeletePlayer(player.id)"
+									class="text-red-600 hover:text-green-900"
+								>
+									削除
 								</button>
 							</div>
 						</td>
@@ -148,4 +154,22 @@ const fetchEvolutionPlayers = async () => {
 onMounted(() => {
 	fetchEvolutionPlayers();
 });
+
+const onDeletePlayer = async (id: string) => {
+	if (confirm('本当に削除しますか？')) {
+		try {
+			const response = await fetch(`${API_ENDPOINTS.EVOLUTIONS.LIST}/${id}`, {
+				method: 'DELETE',
+			});
+			if (response.ok) {
+				alert('選手を削除しました');
+				fetchEvolutionPlayers();
+			} else {
+				alert('選手の削除に失敗しました');
+			}
+		} catch (error) {
+			console.error('選手削除エラー:', error);
+		}
+	}
+};
 </script>
