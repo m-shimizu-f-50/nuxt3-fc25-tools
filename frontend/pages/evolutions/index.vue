@@ -93,16 +93,10 @@
 						<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
 							<div class="flex space-x-4">
 								<button
-									@click="navigateTo(`/evolution/${player.id}`)"
+									@click="navigateTo(`/evolutions/${player.id}`)"
 									class="text-blue-600 hover:text-blue-900"
 								>
 									詳細
-								</button>
-								<button
-									@click="navigateTo(`/evolution/${player.id}/training/new`)"
-									class="text-green-600 hover:text-green-900"
-								>
-									エボリューション
 								</button>
 								<button
 									@click="onDeletePlayer(player.id)"
