@@ -83,75 +83,91 @@
 		</div>
 
 		<!-- エボリューション履歴 -->
-		<h2 class="text-xl font-semibold mb-4">エボリューション履歴</h2>
-		<div class="space-y-16">
-			<div
-				v-for="(evolution, index) in player.evolutions"
-				:key="evolution.evolutionName"
-				class="relative"
-			>
-				<div
-					class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200"
+		<div class="space-y-6">
+			<div class="flex justify-between items-center">
+				<h2 class="text-xl font-semibold">エボリューション履歴</h2>
+				<button
+					@click="addNewEvolution"
+					class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center space-x-2"
 				>
-					<div class="flex justify-between items-start mb-4">
-						<h3 class="text-lg font-semibold text-gray-900">
-							{{ evolution.evolutionName }}
-						</h3>
-						<div class="flex items-center space-x-4">
-							<div class="flex flex-col items-center">
-								<span class="text-xs font-medium text-gray-500">OVR</span>
-								<span class="text-lg font-bold text-gray-900">{{
-									evolution.overall
-								}}</span>
-							</div>
-							<div class="flex flex-col items-center">
-								<span class="text-xs font-medium text-gray-500">PAC</span>
-								<span class="text-lg font-bold text-gray-900">{{
-									evolution.pace
-								}}</span>
-							</div>
-							<div class="flex flex-col items-center">
-								<span class="text-xs font-medium text-gray-500">SHO</span>
-								<span class="text-lg font-bold text-gray-900">{{
-									evolution.shooting
-								}}</span>
-							</div>
-							<div class="flex flex-col items-center">
-								<span class="text-xs font-medium text-gray-500">PAS</span>
-								<span class="text-lg font-bold text-gray-900">{{
-									evolution.passing
-								}}</span>
-							</div>
-							<div class="flex flex-col items-center">
-								<span class="text-xs font-medium text-gray-500">DEF</span>
-								<span class="text-lg font-bold text-gray-900">{{
-									evolution.defending
-								}}</span>
-							</div>
-							<div class="flex flex-col items-center">
-								<span class="text-xs font-medium text-gray-500">PHY</span>
-								<span class="text-lg font-bold text-gray-900">{{
-									evolution.physical
-								}}</span>
+					<svg
+						class="w-5 h-5"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 4v16m8-8H4"
+						></path>
+					</svg>
+					<span>新規追加</span>
+				</button>
+			</div>
+			<div class="space-y-12">
+				<div
+					v-for="(evolution, index) in player.evolutions"
+					:key="evolution.evolutionName"
+					class="relative"
+				>
+					<div
+						class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200"
+					>
+						<div class="flex justify-between items-start mb-4">
+							<h3 class="text-lg font-semibold text-gray-900">
+								{{ evolution.evolutionName }}
+							</h3>
+							<div class="flex items-center space-x-4">
+								<div class="flex flex-col items-center">
+									<span class="text-xs font-medium text-gray-500">OVR</span>
+									<span class="text-lg font-bold text-gray-900">{{
+										evolution.overall
+									}}</span>
+								</div>
+								<div class="flex flex-col items-center">
+									<span class="text-xs font-medium text-gray-500">PAC</span>
+									<span class="text-lg font-bold text-gray-900">{{
+										evolution.pace
+									}}</span>
+								</div>
+								<div class="flex flex-col items-center">
+									<span class="text-xs font-medium text-gray-500">SHO</span>
+									<span class="text-lg font-bold text-gray-900">{{
+										evolution.shooting
+									}}</span>
+								</div>
+								<div class="flex flex-col items-center">
+									<span class="text-xs font-medium text-gray-500">PAS</span>
+									<span class="text-lg font-bold text-gray-900">{{
+										evolution.passing
+									}}</span>
+								</div>
+								<div class="flex flex-col items-center">
+									<span class="text-xs font-medium text-gray-500">DEF</span>
+									<span class="text-lg font-bold text-gray-900">{{
+										evolution.defending
+									}}</span>
+								</div>
+								<div class="flex flex-col items-center">
+									<span class="text-xs font-medium text-gray-500">PHY</span>
+									<span class="text-lg font-bold text-gray-900">{{
+										evolution.physical
+									}}</span>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-				<!-- 矢印アイコン -->
-				<div
-					v-if="index < player.evolutions.length - 1"
-					class="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-					style="top: calc(100% + 2rem)"
-				>
-					<div class="relative w-40 h-40 flex items-center justify-center">
-						<svg
-							class="w-32 h-20 text-gray-400 opacity-50"
-							fill="currentColor"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path d="M12 4l-8 16h16L12 4z"></path>
-						</svg>
+					<!-- 矢印アイコン -->
+					<div
+						v-if="index < player.evolutions.length - 1"
+						class="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+						style="top: calc(100% + 1.5rem)"
+					>
+						<div class="relative w-20 h-20 flex items-center justify-center">
+							<img src="~/assets/images/arrow-down.png" alt="下向き矢印" />
+						</div>
 					</div>
 				</div>
 			</div>
@@ -180,6 +196,7 @@ interface Evolution {
 	passing: number;
 	defending: number;
 	physical: number;
+	isEditing?: boolean;
 }
 
 interface Player {
@@ -233,4 +250,19 @@ const player = ref<Player>({
 		},
 	],
 });
+
+// 新規エボリューション追加
+const addNewEvolution = () => {
+	const newEvolution: Evolution = {
+		evolutionName: '新規エボリューション',
+		overall: 50,
+		pace: 50,
+		shooting: 50,
+		passing: 50,
+		defending: 50,
+		physical: 50,
+		isEditing: true,
+	};
+	player.value.evolutions.unshift(newEvolution);
+};
 </script>
