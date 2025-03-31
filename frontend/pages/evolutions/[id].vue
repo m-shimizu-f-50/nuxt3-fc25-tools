@@ -2,20 +2,6 @@
 	<div class="container mx-auto px-4 py-8">
 		<div class="flex justify-between items-center mb-8">
 			<h1 class="text-3xl font-bold">エボリューション選手詳細</h1>
-			<div class="space-x-4">
-				<button
-					@click="navigateTo(`/evolution/${id}/training/new`)"
-					class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-				>
-					トレーニング記録
-				</button>
-				<button
-					@click="navigateTo('/evolution')"
-					class="text-gray-600 hover:text-gray-900"
-				>
-					一覧に戻る
-				</button>
-			</div>
 		</div>
 
 		<!-- 基本情報カード -->
@@ -116,46 +102,166 @@
 						class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200"
 					>
 						<div class="flex justify-between items-start mb-4">
-							<h3 class="text-lg font-semibold text-gray-900">
-								{{ evolution.evolutionName }}
-							</h3>
+							<div class="flex-1">
+								<template v-if="evolution.isEditing">
+									<input
+										v-model="evolution.evolutionName"
+										type="text"
+										class="w-full px-3 py-2 border rounded-md mb-4"
+										placeholder="エボリューション名"
+									/>
+									<div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+										<div
+											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+										>
+											<span class="text-xs font-medium text-gray-500 mb-1"
+												>OVR</span
+											>
+											<input
+												v-model.number="evolution.overall"
+												type="number"
+												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
+												min="50"
+												max="99"
+											/>
+										</div>
+										<div
+											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+										>
+											<span class="text-xs font-medium text-gray-500 mb-1"
+												>PAC</span
+											>
+											<input
+												v-model.number="evolution.pace"
+												type="number"
+												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
+												min="50"
+												max="99"
+											/>
+										</div>
+										<div
+											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+										>
+											<span class="text-xs font-medium text-gray-500 mb-1"
+												>SHO</span
+											>
+											<input
+												v-model.number="evolution.shooting"
+												type="number"
+												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
+												min="50"
+												max="99"
+											/>
+										</div>
+										<div
+											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+										>
+											<span class="text-xs font-medium text-gray-500 mb-1"
+												>PAS</span
+											>
+											<input
+												v-model.number="evolution.passing"
+												type="number"
+												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
+												min="50"
+												max="99"
+											/>
+										</div>
+										<div
+											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+										>
+											<span class="text-xs font-medium text-gray-500 mb-1"
+												>DEF</span
+											>
+											<input
+												v-model.number="evolution.defending"
+												type="number"
+												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
+												min="50"
+												max="99"
+											/>
+										</div>
+										<div
+											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+										>
+											<span class="text-xs font-medium text-gray-500 mb-1"
+												>PHY</span
+											>
+											<input
+												v-model.number="evolution.physical"
+												type="number"
+												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
+												min="50"
+												max="99"
+											/>
+										</div>
+									</div>
+									<div class="flex justify-end space-x-2 mt-4">
+										<button
+											@click="saveEvolution(index)"
+											class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+										>
+											保存
+										</button>
+										<button
+											@click="cancelEvolution(index)"
+											class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+										>
+											キャンセル
+										</button>
+									</div>
+								</template>
+								<template v-else>
+									<h3 class="text-lg font-semibold text-gray-900">
+										{{ evolution.evolutionName }}
+									</h3>
+								</template>
+							</div>
 							<div class="flex items-center space-x-4">
-								<div class="flex flex-col items-center">
-									<span class="text-xs font-medium text-gray-500">OVR</span>
-									<span class="text-lg font-bold text-gray-900">{{
-										evolution.overall
-									}}</span>
-								</div>
-								<div class="flex flex-col items-center">
-									<span class="text-xs font-medium text-gray-500">PAC</span>
-									<span class="text-lg font-bold text-gray-900">{{
-										evolution.pace
-									}}</span>
-								</div>
-								<div class="flex flex-col items-center">
-									<span class="text-xs font-medium text-gray-500">SHO</span>
-									<span class="text-lg font-bold text-gray-900">{{
-										evolution.shooting
-									}}</span>
-								</div>
-								<div class="flex flex-col items-center">
-									<span class="text-xs font-medium text-gray-500">PAS</span>
-									<span class="text-lg font-bold text-gray-900">{{
-										evolution.passing
-									}}</span>
-								</div>
-								<div class="flex flex-col items-center">
-									<span class="text-xs font-medium text-gray-500">DEF</span>
-									<span class="text-lg font-bold text-gray-900">{{
-										evolution.defending
-									}}</span>
-								</div>
-								<div class="flex flex-col items-center">
-									<span class="text-xs font-medium text-gray-500">PHY</span>
-									<span class="text-lg font-bold text-gray-900">{{
-										evolution.physical
-									}}</span>
-								</div>
+								<template v-if="!evolution.isEditing">
+									<div class="flex flex-col items-center">
+										<span class="text-xs font-medium text-gray-500">OVR</span>
+										<span class="text-lg font-bold text-gray-900">{{
+											evolution.overall
+										}}</span>
+									</div>
+									<div class="flex flex-col items-center">
+										<span class="text-xs font-medium text-gray-500">PAC</span>
+										<span class="text-lg font-bold text-gray-900">{{
+											evolution.pace
+										}}</span>
+									</div>
+									<div class="flex flex-col items-center">
+										<span class="text-xs font-medium text-gray-500">SHO</span>
+										<span class="text-lg font-bold text-gray-900">{{
+											evolution.shooting
+										}}</span>
+									</div>
+									<div class="flex flex-col items-center">
+										<span class="text-xs font-medium text-gray-500">PAS</span>
+										<span class="text-lg font-bold text-gray-900">{{
+											evolution.passing
+										}}</span>
+									</div>
+									<div class="flex flex-col items-center">
+										<span class="text-xs font-medium text-gray-500">DEF</span>
+										<span class="text-lg font-bold text-gray-900">{{
+											evolution.defending
+										}}</span>
+									</div>
+									<div class="flex flex-col items-center">
+										<span class="text-xs font-medium text-gray-500">PHY</span>
+										<span class="text-lg font-bold text-gray-900">{{
+											evolution.physical
+										}}</span>
+									</div>
+									<button
+										@click="editEvolution(index)"
+										class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+									>
+										編集
+									</button>
+								</template>
 							</div>
 						</div>
 					</div>
@@ -264,5 +370,25 @@ const addNewEvolution = () => {
 		isEditing: true,
 	};
 	player.value.evolutions.unshift(newEvolution);
+};
+
+// エボリューション編集
+const editEvolution = (index: number) => {
+	player.value.evolutions[index].isEditing = true;
+};
+
+// エボリューション保存
+const saveEvolution = (index: number) => {
+	player.value.evolutions[index].isEditing = false;
+	// TODO: APIを呼び出して保存
+};
+
+// エボリューションキャンセル
+const cancelEvolution = (index: number) => {
+	if (player.value.evolutions[index].evolutionName === '新規エボリューション') {
+		player.value.evolutions.splice(index, 1);
+	} else {
+		player.value.evolutions[index].isEditing = false;
+	}
 };
 </script>
