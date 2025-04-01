@@ -24,7 +24,50 @@
 						</div>
 					</dl>
 				</div>
-				<div>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div class="grid grid-cols-3 gap-5">
+						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+							<span class="text-xs font-medium text-gray-500">OVR</span>
+							<span class="text-xl font-bold text-gray-900">{{
+								player.stats.overall
+							}}</span>
+						</div>
+						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+							<span class="text-xs font-medium text-gray-500">PAC</span>
+							<span class="text-xl font-bold text-gray-900">{{
+								player.stats.pace
+							}}</span>
+						</div>
+						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+							<span class="text-xs font-medium text-gray-500">SHO</span>
+							<span class="text-xl font-bold text-gray-900">{{
+								player.stats.shooting
+							}}</span>
+						</div>
+						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+							<span class="text-xs font-medium text-gray-500">PAS</span>
+							<span class="text-xl font-bold text-gray-900">{{
+								player.stats.passing
+							}}</span>
+						</div>
+						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+							<span class="text-xs font-medium text-gray-500">DEF</span>
+							<span class="text-xl font-bold text-gray-900">{{
+								player.stats.defending
+							}}</span>
+						</div>
+						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+							<span class="text-xs font-medium text-gray-500">PHY</span>
+							<span class="text-xl font-bold text-gray-900">{{
+								player.stats.physical
+							}}</span>
+						</div>
+					</div>
+					<div class="w-full h-64">
+						<Radar :data="chartData" :options="chartOptions" />
+					</div>
+				</div>
+				<!-- <div>
 					<h2 class="text-xl font-semibold mb-4">現在の能力値</h2>
 					<div class="grid grid-cols-3 gap-4">
 						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
@@ -64,7 +107,7 @@
 							}}</span>
 						</div>
 					</div>
-				</div>
+				</div> -->
 			</div>
 		</div>
 
@@ -282,6 +325,27 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue';
+import { Radar } from 'vue-chartjs';
+import {
+	Chart as ChartJS,
+	RadialLinearScale,
+	PointElement,
+	LineElement,
+	Filler,
+	Tooltip,
+	Legend,
+} from 'chart.js';
+
+ChartJS.register(
+	RadialLinearScale,
+	PointElement,
+	LineElement,
+	Filler,
+	Tooltip,
+	Legend
+);
+
 const route = useRoute();
 const id = route.params.id;
 
@@ -356,6 +420,49 @@ const player = ref<Player>({
 		},
 	],
 });
+
+// レーダーチャートのデータ
+const chartData = computed(() => ({
+	labels: ['OVR', 'PAC', 'SHO', 'PAS', 'DEF', 'PHY'],
+	datasets: [
+		{
+			label: '現在の能力値',
+			data: [
+				player.value.stats.overall,
+				player.value.stats.pace,
+				player.value.stats.shooting,
+				player.value.stats.passing,
+				player.value.stats.defending,
+				player.value.stats.physical,
+			],
+			backgroundColor: 'rgba(59, 130, 246, 0.2)',
+			borderColor: 'rgb(59, 130, 246)',
+			borderWidth: 2,
+		},
+	],
+}));
+
+// レーダーチャートのオプション
+const chartOptions = {
+	scales: {
+		r: {
+			beginAtZero: false,
+			min: 50,
+			max: 99,
+			ticks: {
+				stepSize: 10,
+			},
+			grid: {
+				color: 'rgba(0, 0, 0, 0.1)',
+			},
+		},
+	},
+	plugins: {
+		legend: {
+			display: false,
+		},
+	},
+};
 
 // 新規エボリューション追加
 const addNewEvolution = () => {
