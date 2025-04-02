@@ -6,8 +6,8 @@
 
 		<!-- 基本情報カード -->
 		<div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-				<div>
+			<div class="grid grid-cols-1 md:grid-cols-12 gap-1">
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-1">
 					<h2 class="text-xl font-semibold mb-4">基本情報</h2>
 					<dl class="space-y-4">
 						<div>
@@ -24,7 +24,7 @@
 						</div>
 					</dl>
 				</div>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div class="grid grid-cols-1 md:grid-cols-9 gap-6">
 					<div class="grid grid-cols-3 gap-5">
 						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
 							<span class="text-xs font-medium text-gray-500">OVR</span>
