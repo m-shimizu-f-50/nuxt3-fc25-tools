@@ -6,70 +6,72 @@
 
 		<!-- 基本情報カード -->
 		<div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-			<!-- 基本情報セクション -->
-			<div class="lg:col-span-3">
-				<h2 class="text-xl font-semibold mb-4">基本情報</h2>
-				<div class="space-y-4">
-					<div>
-						<dt class="text-sm font-medium text-gray-500">選手名</dt>
-						<dd class="mt-1 text-lg font-semibold text-gray-900">
-							{{ player.name }}
-						</dd>
-					</div>
-					<div>
-						<dt class="text-sm font-medium text-gray-500">ポジション</dt>
-						<dd class="mt-1 text-lg font-semibold text-gray-900">
-							{{ player.position }}
-						</dd>
+			<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+				<!-- 基本情報セクション -->
+				<div class="lg:col-span-3">
+					<h2 class="text-xl font-semibold mb-4">基本情報</h2>
+					<div class="space-y-4">
+						<div>
+							<dt class="text-sm font-medium text-gray-500">選手名</dt>
+							<dd class="mt-1 text-lg font-semibold text-gray-900">
+								{{ player.name }}
+							</dd>
+						</div>
+						<div>
+							<dt class="text-sm font-medium text-gray-500">ポジション</dt>
+							<dd class="mt-1 text-lg font-semibold text-gray-900">
+								{{ player.position }}
+							</dd>
+						</div>
 					</div>
 				</div>
-			</div>
 
-			<!-- 能力値・レーダーチャートセクション -->
-			<div class="lg:col-span-9">
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<!-- 数値表示 -->
-					<div class="grid grid-cols-3 gap-4">
-						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-							<span class="text-xs font-medium text-gray-500">OVR</span>
-							<span class="text-xl font-bold text-gray-900">{{
-								player.stats.overall
-							}}</span>
+				<!-- 能力値・レーダーチャートセクション -->
+				<div class="lg:col-span-9">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<!-- 数値表示 -->
+						<div class="grid grid-cols-3 gap-4">
+							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+								<span class="text-xs font-medium text-gray-500">OVR</span>
+								<span class="text-xl font-bold text-gray-900">{{
+									player.stats.overall
+								}}</span>
+							</div>
+							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+								<span class="text-xs font-medium text-gray-500">PAC</span>
+								<span class="text-xl font-bold text-gray-900">{{
+									player.stats.pace
+								}}</span>
+							</div>
+							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+								<span class="text-xs font-medium text-gray-500">SHO</span>
+								<span class="text-xl font-bold text-gray-900">{{
+									player.stats.shooting
+								}}</span>
+							</div>
+							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+								<span class="text-xs font-medium text-gray-500">PAS</span>
+								<span class="text-xl font-bold text-gray-900">{{
+									player.stats.passing
+								}}</span>
+							</div>
+							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+								<span class="text-xs font-medium text-gray-500">DEF</span>
+								<span class="text-xl font-bold text-gray-900">{{
+									player.stats.defending
+								}}</span>
+							</div>
+							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+								<span class="text-xs font-medium text-gray-500">PHY</span>
+								<span class="text-xl font-bold text-gray-900">{{
+									player.stats.physical
+								}}</span>
+							</div>
 						</div>
-						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-							<span class="text-xs font-medium text-gray-500">PAC</span>
-							<span class="text-xl font-bold text-gray-900">{{
-								player.stats.pace
-							}}</span>
+						<!-- レーダーチャート -->
+						<div class="w-full h-64">
+							<Radar :data="chartData" :options="chartOptions" />
 						</div>
-						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-							<span class="text-xs font-medium text-gray-500">SHO</span>
-							<span class="text-xl font-bold text-gray-900">{{
-								player.stats.shooting
-							}}</span>
-						</div>
-						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-							<span class="text-xs font-medium text-gray-500">PAS</span>
-							<span class="text-xl font-bold text-gray-900">{{
-								player.stats.passing
-							}}</span>
-						</div>
-						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-							<span class="text-xs font-medium text-gray-500">DEF</span>
-							<span class="text-xl font-bold text-gray-900">{{
-								player.stats.defending
-							}}</span>
-						</div>
-						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-							<span class="text-xs font-medium text-gray-500">PHY</span>
-							<span class="text-xl font-bold text-gray-900">{{
-								player.stats.physical
-							}}</span>
-						</div>
-					</div>
-					<!-- レーダーチャート -->
-					<div class="w-full h-64">
-						<Radar :data="chartData" :options="chartOptions" />
 					</div>
 				</div>
 			</div>
