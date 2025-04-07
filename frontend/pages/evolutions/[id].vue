@@ -333,6 +333,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { API_ENDPOINTS } from '~/constants/api';
 import { Radar } from 'vue-chartjs';
 import {
 	Chart as ChartJS,
@@ -343,6 +344,7 @@ import {
 	Tooltip,
 	Legend,
 } from 'chart.js';
+import axios from 'axios';
 
 ChartJS.register(
 	RadialLinearScale,
@@ -361,16 +363,19 @@ interface Stats {
 	pace: number;
 	shooting: number;
 	passing: number;
+	dribbling: number;
 	defending: number;
 	physical: number;
 }
 
 interface Evolution {
+	id?: string;
 	evolutionName: string;
 	overall: number;
 	pace: number;
 	shooting: number;
 	passing: number;
+	dribbling: number;
 	defending: number;
 	physical: number;
 	isEditing?: boolean;
@@ -394,51 +399,24 @@ const player = ref<Player>({
 		pace: 88,
 		shooting: 90,
 		passing: 82,
+		dribbling: 87,
 		defending: 75,
 		physical: 80,
 	},
-	evolutions: [
-		{
-			evolutionName: 'エボリューション 3',
-			overall: 85,
-			pace: 88,
-			shooting: 90,
-			passing: 82,
-			defending: 75,
-			physical: 80,
-		},
-		{
-			evolutionName: 'エボリューション 2',
-			overall: 82,
-			pace: 85,
-			shooting: 87,
-			passing: 80,
-			defending: 73,
-			physical: 78,
-		},
-		{
-			evolutionName: 'エボリューション 1',
-			overall: 80,
-			pace: 83,
-			shooting: 85,
-			passing: 78,
-			defending: 70,
-			physical: 75,
-		},
-	],
+	evolutions: [],
 });
 
 // レーダーチャートのデータ
 const chartData = computed(() => ({
-	labels: ['OVR', 'PAC', 'SHO', 'PAS', 'DEF', 'PHY'],
+	labels: ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'],
 	datasets: [
 		{
 			label: '現在の能力値',
 			data: [
-				player.value.stats.overall,
 				player.value.stats.pace,
 				player.value.stats.shooting,
 				player.value.stats.passing,
+				player.value.stats.dribbling,
 				player.value.stats.defending,
 				player.value.stats.physical,
 			],
@@ -474,13 +452,15 @@ const chartOptions = {
 // 新規エボリューション追加
 const addNewEvolution = () => {
 	const newEvolution: Evolution = {
-		evolutionName: '新規エボリューション',
-		overall: 50,
-		pace: 50,
-		shooting: 50,
-		passing: 50,
-		defending: 50,
-		physical: 50,
+		// idは設定しない（新規であることを示す）
+		evolutionName: `エボリューション ${new Date().toLocaleDateString('ja-JP')}`,
+		overall: player.value.stats.overall, // 現在の能力値をデフォルト値として設定
+		pace: player.value.stats.pace,
+		shooting: player.value.stats.shooting,
+		passing: player.value.stats.passing,
+		dribbling: player.value.stats.dribbling,
+		defending: player.value.stats.defending,
+		physical: player.value.stats.physical,
 		isEditing: true,
 	};
 	player.value.evolutions.unshift(newEvolution);
@@ -492,9 +472,52 @@ const editEvolution = (index: number) => {
 };
 
 // エボリューション保存
-const saveEvolution = (index: number) => {
-	player.value.evolutions[index].isEditing = false;
-	// TODO: APIを呼び出して保存
+const saveEvolution = async (index: number) => {
+	try {
+		const evolution = player.value.evolutions[index];
+		const evolutionData = {
+			evolutionName: evolution.evolutionName,
+			stats: {
+				overall: evolution.overall,
+				pace: evolution.pace,
+				shooting: evolution.shooting,
+				passing: evolution.passing,
+				dribbling: evolution.dribbling,
+				defending: evolution.defending,
+				physical: evolution.physical,
+			},
+		};
+
+		let response;
+
+		if (!evolution?.id) {
+			console.log('evolution.id:', evolution?.id);
+			// 新規作成の場合
+			response = await axios.post(
+				API_ENDPOINTS.EVOLUTIONS.CREATE_HISTORY(player.value.id),
+				evolutionData
+			);
+
+			// レスポンスから返ってきたIDを設定
+			player.value.evolutions[index].id = response.data.data.id;
+		} else {
+			// 更新の場合
+			response = await axios.put(
+				API_ENDPOINTS.EVOLUTIONS.UPDATE(evolution.id),
+				evolutionData
+			);
+		}
+
+		// 編集モードを解除
+		player.value.evolutions[index].isEditing = false;
+
+		// 成功メッセージ
+		const action = evolution.id ? '更新' : '作成';
+		alert(`エボリューション履歴を${action}しました`);
+	} catch (error) {
+		console.error('エボリューション保存エラー:', error);
+		alert('エボリューション履歴の保存に失敗しました');
+	}
 };
 
 // エボリューションキャンセル
