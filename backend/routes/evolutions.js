@@ -293,25 +293,10 @@ router.post('/players/:id/history', async (req, res) => {
 		stats, // 選手のスタッツ
 	} = req.body;
 
-	console.log('選手ID:', id);
-	console.log('エボリューション名:', evolutionName);
-	console.log('選手のスタッツ:', stats);
-
-	// 1. 選手の存在確認
-	// const [player] = await db.query(
-	// 	'SELECT * FROM evolution_players WHERE id = ?',
-	// 	[id]
-	// );
-	// if (!player) {
-	// 	await db.rollback();
-	// 	return res.status(404).json({
-	// 		message: '選手が見つかりません',
-	// 	});
-	// }
-
 	//  evolutionIDを生成
 	const evolutionId = uuidv4();
 
+	// エボリューション履歴を登録するSQLクエリ
 	const insertEvolutionQuery = `
     INSERT INTO evolutions (
         id,
@@ -327,6 +312,7 @@ router.post('/players/:id/history', async (req, res) => {
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`;
 
+	// エボリューション履歴の登録
 	db.query(
 		insertEvolutionQuery,
 		[
@@ -344,18 +330,20 @@ router.post('/players/:id/history', async (req, res) => {
 		(err, results) => {
 			if (err) {
 				console.error('エボリューション履歴登録エラー:', err);
+				// 重複登録の場合は409 Conflictを返す
 				if (err.code === 'ER_DUP_ENTRY') {
 					return res.status(409).json({
 						message: 'このエボリューション履歴は既に登録されています',
 					});
 				}
+				// その他のエラーの場合は500 Internal Server Errorを返す
 				return res.status(500).json({
 					message: 'エボリューション履歴の登録に失敗しました',
 					error: err.message,
 				});
 			}
 
-			// 3. 登録したエボリューション履歴を取得
+			// 登録したエボリューション履歴を取得するSQLクエリ
 			db.query(
 				`SELECT
 						id,
@@ -411,105 +399,6 @@ router.post('/players/:id/history', async (req, res) => {
 			);
 		}
 	);
-
-	// await db.query(insertEvolutionQuery, [
-	// 	evolutionId, // 生成したUUID
-	// 	id, // 選手ID
-	// 	evolutionName, // エボリューション名
-	// 	stats.overall, // 総合能力値
-	// 	stats.pace, // スピード
-	// 	stats.shooting, // シュート
-	// 	stats.passing, // パス
-	// 	stats.dribbling, // ドリブル
-	// 	stats.defending, // ディフェンス
-	// 	stats.physical, // フィジカル
-	// ]);
-
-	// try {
-	// 	// 1. 選手の存在確認
-	// 	const [player] = await db.query(
-	// 		'SELECT * FROM evolution_players WHERE id = ?',
-	// 		[id]
-	// 	);
-	// 	if (!player) {
-	// 		await db.rollback();
-	// 		return res.status(404).json({
-	// 			message: '選手が見つかりません',
-	// 		});
-	// 	}
-	// 	console.log('選手:', player);
-	// 	// 2. エボリューション履歴を追加
-	// 	const insertEvolutionQuery = `
-	// 	        INSERT INTO evolutions (
-	// 	            id,
-	// 	            evolution_player_id,
-	// 	            evolution_name,
-	// 	            overall,
-	// 	            pace,
-	// 	            shooting,
-	// 	            passing,
-	// 	            dribbling,
-	// 	            defending,
-	// 	            physical
-	// 	        ) VALUES (
-	// 	            UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-	// 	            CURRENT_TIMESTAMP
-	// 	        )
-	// 	    `;
-	// 	const result = await db.query(insertEvolutionQuery, [
-	// 		id,
-	// 		evolutionName,
-	// 		stats.overall,
-	// 		stats.pace,
-	// 		stats.shooting,
-	// 		stats.passing,
-	// 		stats.dribbling,
-	// 		stats.defending,
-	// 		stats.physical,
-	// 	]);
-	// 	// 3. 登録したエボリューション履歴を取得
-	// 	// const [newEvolution] = await db.query(
-	// 	// 	`SELECT
-	// 	//             id,
-	// 	//             evolution_player_id,
-	// 	//             evolution_name,
-	// 	//             overall,
-	// 	//             pace,
-	// 	//             shooting,
-	// 	//             passing,
-	// 	//             dribbling,
-	// 	//             defending,
-	// 	//             physical,
-	// 	//         FROM evolutions
-	// 	//         WHERE id = ?`,
-	// 	// 	[result.insertId]
-	// 	// );
-	// 	// await db.commit();
-	// 	// res.json({
-	// 	// 	message: 'エボリューション履歴を登録しました',
-	// 	// 	data: {
-	// 	// 		id: newEvolution.id,
-	// 	// 		playerId: id,
-	// 	// 		evolutionName: newEvolution.evolution_name,
-	// 	// 		stats: {
-	// 	// 			overall: newEvolution.overall,
-	// 	// 			pace: newEvolution.pace,
-	// 	// 			shooting: newEvolution.shooting,
-	// 	// 			passing: newEvolution.passing,
-	// 	// 			dribbling: newEvolution.dribbling,
-	// 	// 			defending: newEvolution.defending,
-	// 	// 			physical: newEvolution.physical,
-	// 	// 		},
-	// 	// 	},
-	// 	// });
-	// } catch (err) {
-	// 	await db.rollback();
-	// 	console.error('エボリューション履歴登録エラー:', err);
-	// 	return res.status(500).json({
-	// 		message: 'エボリューション履歴の登録に失敗しました',
-	// 		error: err.message,
-	// 	});
-	// }
 });
 
 module.exports = router;
