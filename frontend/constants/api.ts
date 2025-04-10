@@ -21,9 +21,9 @@ export const API_ENDPOINTS = {
 		// エボリューションの更新
 		UPDATE: (evolutionId: string) =>
 			`${BASE_URL}/api/evolutions/${evolutionId}`,
-		// プレイヤーのエボリューション履歴取得
-		GET_EVOLUTIONS: (playerId: string) =>
-			`${BASE_URL}/api/evolutions/players/${playerId}/history`,
+		// プレイヤー詳細取得
+		GET_PLAYER: (playerId: string) =>
+			`${BASE_URL}/api/evolutions/player/${playerId}`,
 		// エボリューションの削除
 		DELETE: (evolutionId: string) =>
 			`${BASE_URL}/api/evolutions/${evolutionId}`,
