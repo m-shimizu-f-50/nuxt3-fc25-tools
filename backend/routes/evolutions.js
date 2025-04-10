@@ -129,7 +129,7 @@ router.post('/create', (req, res) => {
 });
 
 // エボリューション選手の詳細取得
-router.get('/:id', (req, res) => {
+router.get('/player/:id', (req, res) => {
 	const { id } = req.params;
 
 	db.query(

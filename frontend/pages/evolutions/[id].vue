@@ -406,6 +406,21 @@ const player = ref<Player>({
 	evolutions: [],
 });
 
+// 選手データをAPIから取得
+const fetchPlayerData = async () => {
+	try {
+		const response = await axios.get(
+			API_ENDPOINTS.EVOLUTIONS.GET_PLAYER(id as string)
+		);
+
+		console.log('選手データ:', response.data);
+	} catch (error) {
+		console.error('選手データ取得エラー:', error);
+	}
+};
+
+fetchPlayerData();
+
 // レーダーチャートのデータ
 const chartData = computed(() => ({
 	labels: ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'],
@@ -453,7 +468,7 @@ const chartOptions = {
 const addNewEvolution = () => {
 	const newEvolution: Evolution = {
 		// idは設定しない（新規であることを示す）
-		evolutionName: `エボリューション ${new Date().toLocaleDateString('ja-JP')}`,
+		evolutionName: '',
 		overall: player.value.stats.overall, // 現在の能力値をデフォルト値として設定
 		pace: player.value.stats.pace,
 		shooting: player.value.stats.shooting,
