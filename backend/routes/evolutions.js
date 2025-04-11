@@ -129,29 +129,110 @@ router.post('/create', (req, res) => {
 });
 
 // エボリューション選手の詳細取得
-router.get('/player/:id', (req, res) => {
+router.get('/player/:id', async (req, res) => {
 	const { id } = req.params;
 
-	db.query(
-		'SELECT * FROM evolution_players WHERE id = ?',
-		[id],
-		(err, results) => {
-			if (err) {
-				console.error('エボリューション選手詳細取得エラー:', err);
-				return res.status(500).json({
-					message: 'エボリューション選手の詳細取得に失敗しました',
-				});
-			}
+	try {
+		// 選手の基本情報を取得
+		const [player] = await db.query(
+			`SELECT 
+				id,
+				name,
+				position,
+				overall,
+				pace,
+				shooting,
+				passing,
+				dribbling,
+				defending,
+				physical
+			FROM evolution_players
+			WHERE id = ?`,
+			[id]
+		);
 
-			if (!results[0]) {
-				return res.status(404).json({
-					message: 'エボリューション選手が見つかりません',
-				});
-			}
-
-			res.json({ data: results[0] });
+		if (!player) {
+			return res.status(404).json({
+				message: 'エボリューション選手が見つかりません',
+			});
 		}
-	);
+
+		// 選手のエボリューション履歴を取得
+		const [evolutions] = await db.query(
+			`SELECT 
+				id,
+				evolution_name,
+				overall,
+				pace,
+				shooting,
+				passing,
+				dribbling,
+				defending,
+				physical
+			FROM evolutions
+			WHERE evolution_player_id = ?
+			ORDER BY created_at DESC`,
+			[id]
+		);
+
+		const response = {
+			data: {
+				id: player.id,
+				name: player.name,
+				position: player.position,
+				stats: {
+					overall: player.overall,
+					pace: player.pace,
+					shooting: player.shooting,
+					passing: player.passing,
+					dribbling: player.dribbling,
+					defending: player.defending,
+					physical: player.physical,
+				},
+				evolutions: evolutions.map((evolution) => ({
+					id: evolution.id,
+					name: evolution.evolution_name,
+					stats: {
+						overall: evolution.overall,
+						pace: evolution.pace,
+						shooting: evolution.shooting,
+						passing: evolution.passing,
+						dribbling: evolution.dribbling,
+						defending: evolution.defending,
+						physical: evolution.physical,
+					},
+				})),
+			},
+		};
+
+		res.status(200).json(response);
+	} catch (err) {
+		console.error('エボリューション選手詳細取得エラー:', err);
+		return res.status(500).json({
+			message: 'エボリューション選手の詳細取得に失敗しました',
+		});
+	}
+
+	// db.query(
+	// 	'SELECT * FROM evolution_players WHERE id = ?',
+	// 	[id],
+	// 	(err, results) => {
+	// 		if (err) {
+	// 			console.error('エボリューション選手詳細取得エラー:', err);
+	// 			return res.status(500).json({
+	// 				message: 'エボリューション選手の詳細取得に失敗しました',
+	// 			});
+	// 		}
+
+	// 		if (!results[0]) {
+	// 			return res.status(404).json({
+	// 				message: 'エボリューション選手が見つかりません',
+	// 			});
+	// 		}
+
+	// 		res.json({ data: results[0] });
+	// 	}
+	// );
 });
 
 // エボリューション選手の更新
