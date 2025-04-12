@@ -134,7 +134,7 @@ router.get('/player/:id', async (req, res) => {
 
 	try {
 		// 選手の基本情報を取得
-		const [player] = await db.query(
+		const [playerRows] = await db.query(
 			`SELECT 
 				id,
 				name,
@@ -150,6 +150,8 @@ router.get('/player/:id', async (req, res) => {
 			WHERE id = ?`,
 			[id]
 		);
+
+		const player = playerRows[0];
 
 		if (!player) {
 			return res.status(404).json({
@@ -189,21 +191,25 @@ router.get('/player/:id', async (req, res) => {
 					defending: player.defending,
 					physical: player.physical,
 				},
-				evolutions: evolutions.map((evolution) => ({
-					id: evolution.id,
-					name: evolution.evolution_name,
-					stats: {
-						overall: evolution.overall,
-						pace: evolution.pace,
-						shooting: evolution.shooting,
-						passing: evolution.passing,
-						dribbling: evolution.dribbling,
-						defending: evolution.defending,
-						physical: evolution.physical,
-					},
-				})),
+				evolutions: evolutions
+					? evolutions.map((evolution) => ({
+							id: evolution.id,
+							name: evolution.evolution_name,
+							stats: {
+								overall: evolution.overall,
+								pace: evolution.pace,
+								shooting: evolution.shooting,
+								passing: evolution.passing,
+								dribbling: evolution.dribbling,
+								defending: evolution.defending,
+								physical: evolution.physical,
+							},
+					  }))
+					: [],
 			},
 		};
+
+		console.log('選手詳細取得:', response);
 
 		res.status(200).json(response);
 	} catch (err) {
