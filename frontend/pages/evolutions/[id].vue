@@ -34,37 +34,49 @@
 							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
 								<span class="text-xs font-medium text-gray-500">OVR</span>
 								<span class="text-xl font-bold text-gray-900">{{
-									player.stats.overall
+									player.evolutions[0]
+										? player.evolutions[0].overall
+										: player.stats.overall
 								}}</span>
 							</div>
 							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
 								<span class="text-xs font-medium text-gray-500">PAC</span>
 								<span class="text-xl font-bold text-gray-900">{{
-									player.stats.pace
+									player.evolutions[0]
+										? player.evolutions[0].pace
+										: player.stats.pace
 								}}</span>
 							</div>
 							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
 								<span class="text-xs font-medium text-gray-500">SHO</span>
 								<span class="text-xl font-bold text-gray-900">{{
-									player.stats.shooting
+									player.evolutions[0]
+										? player.evolutions[0].shooting
+										: player.stats.shooting
 								}}</span>
 							</div>
 							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
 								<span class="text-xs font-medium text-gray-500">PAS</span>
 								<span class="text-xl font-bold text-gray-900">{{
-									player.stats.passing
+									player.evolutions[0]
+										? player.evolutions[0].passing
+										: player.stats.passing
 								}}</span>
 							</div>
 							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
 								<span class="text-xs font-medium text-gray-500">DEF</span>
 								<span class="text-xl font-bold text-gray-900">{{
-									player.stats.defending
+									player.evolutions[0]
+										? player.evolutions[0].defending
+										: player.stats.defending
 								}}</span>
 							</div>
 							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
 								<span class="text-xs font-medium text-gray-500">PHY</span>
 								<span class="text-xl font-bold text-gray-900">{{
-									player.stats.physical
+									player.evolutions[0]
+										? player.evolutions[0].physical
+										: player.stats.physical
 								}}</span>
 							</div>
 						</div>
@@ -160,7 +172,7 @@
 										class="w-full px-3 py-2 border rounded-md mb-4"
 										placeholder="エボリューション名"
 									/>
-									<div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+									<div class="grid grid-cols-3 md:grid-cols-7 gap-3">
 										<div
 											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
 										>
@@ -211,6 +223,20 @@
 											>
 											<input
 												v-model.number="evolution.passing"
+												type="number"
+												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
+												min="50"
+												max="99"
+											/>
+										</div>
+										<div
+											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+										>
+											<span class="text-xs font-medium text-gray-500 mb-1"
+												>PAS</span
+											>
+											<input
+												v-model.number="evolution.dribbling"
 												type="number"
 												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
 												min="50"
@@ -294,6 +320,12 @@
 										}}</span>
 									</div>
 									<div class="flex flex-col items-center">
+										<span class="text-xs font-medium text-gray-500">PAS</span>
+										<span class="text-lg font-bold text-gray-900">{{
+											evolution.dribbling
+										}}</span>
+									</div>
+									<div class="flex flex-col items-center">
 										<span class="text-xs font-medium text-gray-500">DEF</span>
 										<span class="text-lg font-bold text-gray-900">{{
 											evolution.defending
@@ -306,6 +338,7 @@
 										}}</span>
 									</div>
 									<button
+										v-if="index === 0"
 										@click="editEvolution(index)"
 										class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
 									>
@@ -370,7 +403,6 @@ interface Stats {
 
 interface Evolution {
 	id?: string;
-	name: string;
 	evolutionName: string;
 	overall: number;
 	pace: number;
@@ -418,6 +450,23 @@ const fetchPlayerData = async () => {
 		if (!playerData) {
 			throw new Error('選手データが見つかりません');
 		}
+
+		// 初期値（エボリューション前）のデータを作成
+		const initialEvolution = {
+			id: 'initial',
+			evolutionName: '初期状態',
+			overall: playerData.stats.overall,
+			pace: playerData.stats.pace,
+			shooting: playerData.stats.shooting,
+			passing: playerData.stats.passing,
+			dribbling: playerData.stats.dribbling,
+			defending: playerData.stats.defending,
+			physical: playerData.stats.physical,
+		};
+
+		// エボリューション履歴の配列を作成（初期値を先頭に追加）
+		const evolutions = [...playerData.evolutions, initialEvolution];
+
 		player.value = {
 			id: playerData.id,
 			name: playerData.name,
@@ -431,10 +480,10 @@ const fetchPlayerData = async () => {
 				defending: playerData.stats.defending,
 				physical: playerData.stats.physical,
 			},
-			evolutions: playerData.evolutions || [],
+			evolutions: evolutions,
 		};
 
-		console.log('選手データ:', player.value);
+		console.log('選手データOK:', player.value);
 	} catch (error) {
 		console.error('選手データ取得エラー:', error);
 	}
@@ -443,25 +492,44 @@ const fetchPlayerData = async () => {
 fetchPlayerData();
 
 // レーダーチャートのデータ
-const chartData = computed(() => ({
-	labels: ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'],
-	datasets: [
-		{
-			label: '現在の能力値',
-			data: [
-				player.value.stats.pace,
-				player.value.stats.shooting,
-				player.value.stats.passing,
-				player.value.stats.dribbling,
-				player.value.stats.defending,
-				player.value.stats.physical,
+// レーダーチャートのデータ
+const chartData = computed(() => {
+	// player.valueが存在しない、またはevolutionsが存在しない場合はデフォルト値を返す
+	if (!player.value?.evolutions?.length) {
+		return {
+			labels: ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'],
+			datasets: [
+				{
+					label: '現在の能力値',
+					data: [0, 0, 0, 0, 0, 0],
+					backgroundColor: 'rgba(59, 130, 246, 0.2)',
+					borderColor: 'rgb(59, 130, 246)',
+					borderWidth: 2,
+				},
 			],
-			backgroundColor: 'rgba(59, 130, 246, 0.2)',
-			borderColor: 'rgb(59, 130, 246)',
-			borderWidth: 2,
-		},
-	],
-}));
+		};
+	}
+
+	return {
+		labels: ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'],
+		datasets: [
+			{
+				label: '現在の能力値',
+				data: [
+					player.value.evolutions[0].pace || 0,
+					player.value.evolutions[0].shooting || 0,
+					player.value.evolutions[0].passing || 0,
+					player.value.evolutions[0].dribbling || 0,
+					player.value.evolutions[0].defending || 0,
+					player.value.evolutions[0].physical || 0,
+				],
+				backgroundColor: 'rgba(59, 130, 246, 0.2)',
+				borderColor: 'rgb(59, 130, 246)',
+				borderWidth: 2,
+			},
+		],
+	};
+});
 
 // レーダーチャートのオプション
 const chartOptions = {
@@ -490,13 +558,13 @@ const addNewEvolution = () => {
 	const newEvolution: Evolution = {
 		// idは設定しない（新規であることを示す）
 		evolutionName: '',
-		overall: player.value.stats.overall, // 現在の能力値をデフォルト値として設定
-		pace: player.value.stats.pace,
-		shooting: player.value.stats.shooting,
-		passing: player.value.stats.passing,
-		dribbling: player.value.stats.dribbling,
-		defending: player.value.stats.defending,
-		physical: player.value.stats.physical,
+		overall: player.value.evolutions[0].overall,
+		pace: player.value.evolutions[0].pace,
+		shooting: player.value.evolutions[0].shooting,
+		passing: player.value.evolutions[0].passing,
+		dribbling: player.value.evolutions[0].dribbling,
+		defending: player.value.evolutions[0].defending,
+		physical: player.value.evolutions[0].physical,
 		isEditing: true,
 	};
 	player.value.evolutions.unshift(newEvolution);
@@ -558,10 +626,7 @@ const saveEvolution = async (index: number) => {
 
 // エボリューションキャンセル
 const cancelEvolution = (index: number) => {
-	if (player.value.evolutions[index].evolutionName === '新規エボリューション') {
-		player.value.evolutions.splice(index, 1);
-	} else {
-		player.value.evolutions[index].isEditing = false;
-	}
+	player.value.evolutions.splice(index, 1);
+	player.value.evolutions[index].isEditing = false;
 };
 </script>
