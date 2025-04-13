@@ -145,7 +145,7 @@
 			<div class="space-y-12">
 				<div
 					v-for="(evolution, index) in player.evolutions"
-					:key="evolution.evolutionName"
+					:key="evolution.id"
 					class="relative"
 				>
 					<div
@@ -370,6 +370,7 @@ interface Stats {
 
 interface Evolution {
 	id?: string;
+	name: string;
 	evolutionName: string;
 	overall: number;
 	pace: number;
@@ -391,17 +392,17 @@ interface Player {
 
 // モックデータ
 const player = ref<Player>({
-	id: id as string,
-	name: '山田太郎',
-	position: 'FW',
+	id: '',
+	name: '',
+	position: '',
 	stats: {
-		overall: 85,
-		pace: 88,
-		shooting: 90,
-		passing: 82,
-		dribbling: 87,
-		defending: 75,
-		physical: 80,
+		overall: 0,
+		pace: 0,
+		shooting: 0,
+		passing: 0,
+		dribbling: 0,
+		defending: 0,
+		physical: 0,
 	},
 	evolutions: [],
 });
@@ -413,7 +414,27 @@ const fetchPlayerData = async () => {
 			API_ENDPOINTS.EVOLUTIONS.GET_PLAYER(id as string)
 		);
 
-		console.log('選手データ:', response.data);
+		const playerData = response.data.data;
+		if (!playerData) {
+			throw new Error('選手データが見つかりません');
+		}
+		player.value = {
+			id: playerData.id,
+			name: playerData.name,
+			position: playerData.position,
+			stats: {
+				overall: playerData.stats.overall,
+				pace: playerData.stats.pace,
+				shooting: playerData.stats.shooting,
+				passing: playerData.stats.passing,
+				dribbling: playerData.stats.dribbling,
+				defending: playerData.stats.defending,
+				physical: playerData.stats.physical,
+			},
+			evolutions: playerData.evolutions || [],
+		};
+
+		console.log('選手データ:', player.value);
 	} catch (error) {
 		console.error('選手データ取得エラー:', error);
 	}
