@@ -482,8 +482,6 @@ const fetchPlayerData = async () => {
 			},
 			evolutions: evolutions,
 		};
-
-		console.log('選手データOK:', player.value);
 	} catch (error) {
 		console.error('選手データ取得エラー:', error);
 	}
@@ -491,7 +489,6 @@ const fetchPlayerData = async () => {
 
 fetchPlayerData();
 
-// レーダーチャートのデータ
 // レーダーチャートのデータ
 const chartData = computed(() => {
 	// player.valueが存在しない、またはevolutionsが存在しない場合はデフォルト値を返す
@@ -626,7 +623,11 @@ const saveEvolution = async (index: number) => {
 
 // エボリューションキャンセル
 const cancelEvolution = (index: number) => {
+	if (player.value.evolutions[index].id) {
+		// 編集モードを解除
+		player.value.evolutions[index].isEditing = false;
+		return;
+	}
 	player.value.evolutions.splice(index, 1);
-	player.value.evolutions[index].isEditing = false;
 };
 </script>
