@@ -66,14 +66,14 @@ router.post('/create', (req, res) => {
 	];
 	const invalidStats = statFields.filter((field) => {
 		const value = stats[field];
-		return value === undefined || value < 50 || value > 99;
+		return value === undefined || value < 0 || value > 99;
 	});
 
 	if (invalidStats.length > 0) {
 		return res.status(400).json({
 			message: 'ステータス値が不正です',
 			invalidFields: invalidStats,
-			validRange: { min: 50, max: 99 },
+			validRange: { min: 0, max: 99 },
 		});
 	}
 

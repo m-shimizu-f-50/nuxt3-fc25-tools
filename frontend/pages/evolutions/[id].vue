@@ -23,6 +23,16 @@
 								{{ player.position }}
 							</dd>
 						</div>
+						<div>
+							<div class="mt-4 flex flex-col items-center p-5 bg-gray-50 rounded-lg">
+								<span class="text-xs font-medium text-gray-500">OVR</span>
+								<span class="text-xl font-bold text-gray-900">{{
+									player.evolutions[0]
+										? player.evolutions[0].overall
+										: player.stats.overall
+								}}</span>
+							</div>
+						</div>
 					</div>
 				</div>
 
@@ -31,14 +41,6 @@
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 						<!-- 数値表示 -->
 						<div class="grid grid-cols-3 gap-4">
-							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-								<span class="text-xs font-medium text-gray-500">OVR</span>
-								<span class="text-xl font-bold text-gray-900">{{
-									player.evolutions[0]
-										? player.evolutions[0].overall
-										: player.stats.overall
-								}}</span>
-							</div>
 							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
 								<span class="text-xs font-medium text-gray-500">PAC</span>
 								<span class="text-xl font-bold text-gray-900">{{
@@ -64,6 +66,14 @@
 								}}</span>
 							</div>
 							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+								<span class="text-xs font-medium text-gray-500">DRI</span>
+								<span class="text-xl font-bold text-gray-900">{{
+									player.evolutions[0]
+										? player.evolutions[0].dribbling
+										: player.stats.dribbling
+								}}</span>
+							</div>
+							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
 								<span class="text-xs font-medium text-gray-500">DEF</span>
 								<span class="text-xl font-bold text-gray-900">{{
 									player.evolutions[0]
@@ -81,7 +91,7 @@
 							</div>
 						</div>
 						<!-- レーダーチャート -->
-						<div class="w-full h-64">
+						<div class="flex justify-center items-center w-full h-100">
 							<Radar :data="chartData" :options="chartOptions" />
 						</div>
 					</div>
@@ -183,7 +193,7 @@
 												v-model.number="evolution.overall"
 												type="number"
 												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
-												min="50"
+												min="0"
 												max="99"
 											/>
 										</div>
@@ -197,7 +207,7 @@
 												v-model.number="evolution.pace"
 												type="number"
 												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
-												min="50"
+												min="0"
 												max="99"
 											/>
 										</div>
@@ -211,7 +221,7 @@
 												v-model.number="evolution.shooting"
 												type="number"
 												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
-												min="50"
+												min="0"
 												max="99"
 											/>
 										</div>
@@ -225,7 +235,7 @@
 												v-model.number="evolution.passing"
 												type="number"
 												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
-												min="50"
+												min="0"
 												max="99"
 											/>
 										</div>
@@ -233,13 +243,13 @@
 											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
 										>
 											<span class="text-xs font-medium text-gray-500 mb-1"
-												>PAS</span
+												>DRI</span
 											>
 											<input
 												v-model.number="evolution.dribbling"
 												type="number"
 												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
-												min="50"
+												min="0"
 												max="99"
 											/>
 										</div>
@@ -253,7 +263,7 @@
 												v-model.number="evolution.defending"
 												type="number"
 												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
-												min="50"
+												min="0"
 												max="99"
 											/>
 										</div>
@@ -267,7 +277,7 @@
 												v-model.number="evolution.physical"
 												type="number"
 												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
-												min="50"
+												min="0"
 												max="99"
 											/>
 										</div>
@@ -320,7 +330,7 @@
 										}}</span>
 									</div>
 									<div class="flex flex-col items-center">
-										<span class="text-xs font-medium text-gray-500">PAS</span>
+										<span class="text-xs font-medium text-gray-500">DRI</span>
 										<span class="text-lg font-bold text-gray-900">{{
 											evolution.dribbling
 										}}</span>
@@ -482,8 +492,6 @@ const fetchPlayerData = async () => {
 			},
 			evolutions: evolutions,
 		};
-
-		console.log('選手データOK:', player.value);
 	} catch (error) {
 		console.error('選手データ取得エラー:', error);
 	}
@@ -491,7 +499,6 @@ const fetchPlayerData = async () => {
 
 fetchPlayerData();
 
-// レーダーチャートのデータ
 // レーダーチャートのデータ
 const chartData = computed(() => {
 	// player.valueが存在しない、またはevolutionsが存在しない場合はデフォルト値を返す
@@ -511,23 +518,23 @@ const chartData = computed(() => {
 	}
 
 	return {
-		labels: ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'],
-		datasets: [
-			{
-				label: '現在の能力値',
-				data: [
-					player.value.evolutions[0].pace || 0,
-					player.value.evolutions[0].shooting || 0,
-					player.value.evolutions[0].passing || 0,
-					player.value.evolutions[0].dribbling || 0,
-					player.value.evolutions[0].defending || 0,
-					player.value.evolutions[0].physical || 0,
-				],
-				backgroundColor: 'rgba(59, 130, 246, 0.2)',
-				borderColor: 'rgb(59, 130, 246)',
-				borderWidth: 2,
-			},
-		],
+    labels: ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'],
+    datasets: [
+        {
+            label: '現在の能力値',
+            data: [
+                Math.max(60, player.value.evolutions[0].pace || 0),
+                Math.max(60, player.value.evolutions[0].shooting || 0),
+                Math.max(60, player.value.evolutions[0].passing || 0),
+                Math.max(60, player.value.evolutions[0].dribbling || 0),
+                Math.max(60, player.value.evolutions[0].defending || 0),
+                Math.max(60, player.value.evolutions[0].physical || 0),
+            ],
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderColor: 'rgb(59, 130, 246)',
+            borderWidth: 2,
+        },
+    ],
 	};
 });
 
@@ -539,7 +546,7 @@ const chartOptions = {
 			min: 50,
 			max: 99,
 			ticks: {
-				stepSize: 10,
+				stepSize: 5,
 			},
 			grid: {
 				color: 'rgba(0, 0, 0, 0.1)',
@@ -626,7 +633,11 @@ const saveEvolution = async (index: number) => {
 
 // エボリューションキャンセル
 const cancelEvolution = (index: number) => {
+	if (player.value.evolutions[index].id) {
+		// 編集モードを解除
+		player.value.evolutions[index].isEditing = false;
+		return;
+	}
 	player.value.evolutions.splice(index, 1);
-	player.value.evolutions[index].isEditing = false;
 };
 </script>
