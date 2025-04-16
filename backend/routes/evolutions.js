@@ -475,4 +475,59 @@ router.post('/players/:id/history', async (req, res) => {
 	);
 });
 
+// エボリューション履歴の更新
+// PUT /api/evolutions/:id/evolutions
+router.put('/players/:id/history', (req, res) => {
+	const { id } = req.params;
+	const { evolutionName, stats } = req.body;
+
+	// エボリューション履歴を更新するSQLクエリ
+	const updateEvolutionQuery = `
+		UPDATE evolutions SET 
+				evolution_name = ?, 
+				overall = ?, 
+				pace = ?, 
+				shooting = ?, 
+				passing = ?, 
+				dribbling = ?, 
+				defending = ?, 
+				physical = ?
+		WHERE id = ?
+	`;
+
+	db.query(
+		updateEvolutionQuery,
+		[
+			evolutionName,
+			stats.overall,
+			stats.pace,
+			stats.shooting,
+			stats.passing,
+			stats.dribbling,
+			stats.defending,
+			stats.physical,
+			id,
+		],
+		(err, results) => {
+			if (err) {
+				console.error('エボリューション履歴更新エラー:', err);
+				return res.status(500).json({
+					message: 'エボリューション履歴の更新に失敗しました',
+					error: err.message,
+				});
+			}
+
+			if (results.affectedRows === 0) {
+				return res.status(404).json({
+					message: 'エボリューション履歴が見つかりません',
+				});
+			}
+
+			res.json({
+				message: 'エボリューション履歴を更新しました',
+			});
+		}
+	);
+});
+
 module.exports = router;
