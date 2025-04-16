@@ -24,7 +24,9 @@
 							</dd>
 						</div>
 						<div>
-							<div class="mt-4 flex flex-col items-center p-5 bg-gray-50 rounded-lg">
+							<div
+								class="mt-4 flex flex-col items-center p-5 bg-gray-50 rounded-lg"
+							>
 								<span class="text-xs font-medium text-gray-500">OVR</span>
 								<span class="text-xl font-bold text-gray-900">{{
 									player.evolutions[0]
@@ -518,23 +520,23 @@ const chartData = computed(() => {
 	}
 
 	return {
-    labels: ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'],
-    datasets: [
-        {
-            label: '現在の能力値',
-            data: [
-                Math.max(60, player.value.evolutions[0].pace || 0),
-                Math.max(60, player.value.evolutions[0].shooting || 0),
-                Math.max(60, player.value.evolutions[0].passing || 0),
-                Math.max(60, player.value.evolutions[0].dribbling || 0),
-                Math.max(60, player.value.evolutions[0].defending || 0),
-                Math.max(60, player.value.evolutions[0].physical || 0),
-            ],
-            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-            borderColor: 'rgb(59, 130, 246)',
-            borderWidth: 2,
-        },
-    ],
+		labels: ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'],
+		datasets: [
+			{
+				label: '現在の能力値',
+				data: [
+					Math.max(60, player.value.evolutions[0].pace || 0),
+					Math.max(60, player.value.evolutions[0].shooting || 0),
+					Math.max(60, player.value.evolutions[0].passing || 0),
+					Math.max(60, player.value.evolutions[0].dribbling || 0),
+					Math.max(60, player.value.evolutions[0].defending || 0),
+					Math.max(60, player.value.evolutions[0].physical || 0),
+				],
+				backgroundColor: 'rgba(59, 130, 246, 0.2)',
+				borderColor: 'rgb(59, 130, 246)',
+				borderWidth: 2,
+			},
+		],
 	};
 });
 
@@ -614,7 +616,7 @@ const saveEvolution = async (index: number) => {
 		} else {
 			// 更新の場合
 			response = await axios.put(
-				API_ENDPOINTS.EVOLUTIONS.UPDATE(evolution.id),
+				API_ENDPOINTS.EVOLUTIONS.UPDATE_HISTORY(evolution.id),
 				evolutionData
 			);
 		}

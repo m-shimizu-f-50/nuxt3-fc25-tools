@@ -18,6 +18,9 @@ export const API_ENDPOINTS = {
 		// エボリューション履歴の追加
 		CREATE_HISTORY: (playerId: string) =>
 			`${BASE_URL}/api/evolutions/players/${playerId}/history`,
+		// エボリューション履歴の更新
+		UPDATE_HISTORY: (playerId: string) =>
+			`${BASE_URL}/api/evolutions/players/${playerId}/history`,
 		// エボリューションの更新
 		UPDATE: (evolutionId: string) =>
 			`${BASE_URL}/api/evolutions/${evolutionId}`,
