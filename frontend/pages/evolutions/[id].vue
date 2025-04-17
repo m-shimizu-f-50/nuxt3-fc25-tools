@@ -390,6 +390,7 @@ import {
 	Legend,
 } from 'chart.js';
 import axios from 'axios';
+import { useToast } from 'vue-toastification';
 
 ChartJS.register(
 	RadialLinearScale,
@@ -401,6 +402,7 @@ ChartJS.register(
 );
 
 const route = useRoute();
+const toast = useToast();
 const id = route.params.id;
 
 interface Stats {
@@ -604,7 +606,6 @@ const saveEvolution = async (index: number) => {
 		let response;
 
 		if (!evolution?.id) {
-			console.log('evolution.id:', evolution?.id);
 			// 新規作成の場合
 			response = await axios.post(
 				API_ENDPOINTS.EVOLUTIONS.CREATE_HISTORY(player.value.id),
@@ -625,11 +626,11 @@ const saveEvolution = async (index: number) => {
 		player.value.evolutions[index].isEditing = false;
 
 		// 成功メッセージ
-		const action = evolution.id ? '更新' : '作成';
-		alert(`エボリューション履歴を${action}しました`);
+		const action = evolution.id ? '更新' : '登録';
+		toast.success(`エボリューション選手を${action}しました`);
 	} catch (error) {
 		console.error('エボリューション保存エラー:', error);
-		alert('エボリューション履歴の保存に失敗しました');
+		toast.error('エボリューション選手の保存に失敗しました');
 	}
 };
 
