@@ -58,7 +58,7 @@
 								v-model="form.stats.overall"
 								class="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
 								required
-								min="50"
+								min="0"
 								max="99"
 							/>
 						</div>
@@ -72,7 +72,7 @@
 								v-model="form.stats.pace"
 								class="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
 								required
-								min="50"
+								min="0"
 								max="99"
 							/>
 						</div>
@@ -88,7 +88,7 @@
 								v-model="form.stats.shooting"
 								class="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
 								required
-								min="50"
+								min="0"
 								max="99"
 							/>
 						</div>
@@ -104,7 +104,7 @@
 								v-model="form.stats.passing"
 								class="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
 								required
-								min="50"
+								min="0"
 								max="99"
 							/>
 						</div>
@@ -120,7 +120,7 @@
 								v-model="form.stats.dribbling"
 								class="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
 								required
-								min="50"
+								min="0"
 								max="99"
 							/>
 						</div>
@@ -136,7 +136,7 @@
 								v-model="form.stats.defending"
 								class="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
 								required
-								min="50"
+								min="0"
 								max="99"
 							/>
 						</div>
@@ -152,7 +152,7 @@
 								v-model="form.stats.physical"
 								class="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
 								required
-								min="50"
+								min="0"
 								max="99"
 							/>
 						</div>
@@ -247,46 +247,46 @@ const validateForm = (): boolean => {
 
 	// ステータスのバリデーション
 	const stats = form.value.stats;
-	if (stats.overall < 50 || stats.overall > 99) {
+	if (stats.overall < 0 || stats.overall > 99) {
 		errors.value.stats = {
 			...errors.value.stats,
-			overall: '総合能力は50から99の間で入力してください',
+			overall: '総合能力は0から99の間で入力してください',
 		};
 	}
-	if (stats.pace < 50 || stats.pace > 99) {
+	if (stats.pace < 0 || stats.pace > 99) {
 		errors.value.stats = {
 			...errors.value.stats,
-			pace: 'スピードは50から99の間で入力してください',
+			pace: 'スピードは0から99の間で入力してください',
 		};
 	}
-	if (stats.shooting < 50 || stats.shooting > 99) {
+	if (stats.shooting < 0 || stats.shooting > 99) {
 		errors.value.stats = {
 			...errors.value.stats,
-			shooting: 'シュートは50から99の間で入力してください',
+			shooting: 'シュートは0から99の間で入力してください',
 		};
 	}
-	if (stats.passing < 50 || stats.passing > 99) {
+	if (stats.passing < 0 || stats.passing > 99) {
 		errors.value.stats = {
 			...errors.value.stats,
-			passing: 'パスは50から99の間で入力してください',
+			passing: 'パスは0から99の間で入力してください',
 		};
 	}
-	if (stats.dribbling < 50 || stats.dribbling > 99) {
+	if (stats.dribbling < 0 || stats.dribbling > 99) {
 		errors.value.stats = {
 			...errors.value.stats,
-			dribbling: 'ドリブルは50から99の間で入力してください',
+			dribbling: 'ドリブルは0から99の間で入力してください',
 		};
 	}
-	if (stats.defending < 50 || stats.defending > 99) {
+	if (stats.defending < 0 || stats.defending > 99) {
 		errors.value.stats = {
 			...errors.value.stats,
-			defending: 'ディフェンスは50から99の間で入力してください',
+			defending: 'ディフェンスは0から99の間で入力してください',
 		};
 	}
-	if (stats.physical < 50 || stats.physical > 99) {
+	if (stats.physical < 0 || stats.physical > 99) {
 		errors.value.stats = {
 			...errors.value.stats,
-			physical: 'フィジカルは50から99の間で入力してください',
+			physical: 'フィジカルは0から99の間で入力してください',
 		};
 	}
 

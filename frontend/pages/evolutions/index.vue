@@ -146,9 +146,7 @@ const fetchEvolutionPlayers = async () => {
 	}
 };
 
-onMounted(() => {
-	fetchEvolutionPlayers();
-});
+fetchEvolutionPlayers();
 
 const onDeletePlayer = async (id: string) => {
 	if (confirm('本当に削除しますか？')) {
