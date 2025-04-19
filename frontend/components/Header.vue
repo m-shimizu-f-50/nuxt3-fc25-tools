@@ -11,7 +11,7 @@
 					</li>
 					<li>
 						<NuxtLink to="/evolutions" class="p-5 hover:bg-gray-400 transition"
-							>エボリューション</NuxtLink
+							>EVO</NuxtLink
 						>
 					</li>
 				</ul>
