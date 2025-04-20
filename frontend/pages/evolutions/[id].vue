@@ -29,8 +29,8 @@
 							>
 								<span class="text-xs font-medium text-gray-500">OVR</span>
 								<span class="text-xl font-bold text-gray-900">{{
-									player.evolutions[0]
-										? player.evolutions[0].overall
+									activeStatus.overall
+										? activeStatus.overall
 										: player.stats.overall
 								}}</span>
 							</div>
@@ -46,40 +46,38 @@
 							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
 								<span class="text-xs font-medium text-gray-500">PAC</span>
 								<span class="text-xl font-bold text-gray-900">{{
-									player.evolutions[0]
-										? player.evolutions[0].pace
-										: player.stats.pace
+									activeStatus.pace ? activeStatus.pace : player.stats.pace
 								}}</span>
 							</div>
 							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
 								<span class="text-xs font-medium text-gray-500">SHO</span>
 								<span class="text-xl font-bold text-gray-900">{{
-									player.evolutions[0]
-										? player.evolutions[0].shooting
+									activeStatus.shooting
+										? activeStatus.shooting
 										: player.stats.shooting
 								}}</span>
 							</div>
 							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
 								<span class="text-xs font-medium text-gray-500">PAS</span>
 								<span class="text-xl font-bold text-gray-900">{{
-									player.evolutions[0]
-										? player.evolutions[0].passing
+									activeStatus.passing
+										? activeStatus.passing
 										: player.stats.passing
 								}}</span>
 							</div>
 							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
 								<span class="text-xs font-medium text-gray-500">DRI</span>
 								<span class="text-xl font-bold text-gray-900">{{
-									player.evolutions[0]
-										? player.evolutions[0].dribbling
+									activeStatus.dribbling
+										? activeStatus.dribbling
 										: player.stats.dribbling
 								}}</span>
 							</div>
 							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
 								<span class="text-xs font-medium text-gray-500">DEF</span>
 								<span class="text-xl font-bold text-gray-900">{{
-									player.evolutions[0]
-										? player.evolutions[0].defending
+									activeStatus.defending
+										? activeStatus.defending
 										: player.stats.defending
 								}}</span>
 							</div>
@@ -99,47 +97,6 @@
 					</div>
 				</div>
 			</div>
-			<!-- <div>
-					<h2 class="text-xl font-semibold mb-4">現在の能力値</h2>
-					<div class="grid grid-cols-3 gap-4">
-						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-							<span class="text-xs font-medium text-gray-500">OVR</span>
-							<span class="text-xl font-bold text-gray-900">{{
-								player.stats.overall
-							}}</span>
-						</div>
-						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-							<span class="text-xs font-medium text-gray-500">PAC</span>
-							<span class="text-xl font-bold text-gray-900">{{
-								player.stats.pace
-							}}</span>
-						</div>
-						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-							<span class="text-xs font-medium text-gray-500">SHO</span>
-							<span class="text-xl font-bold text-gray-900">{{
-								player.stats.shooting
-							}}</span>
-						</div>
-						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-							<span class="text-xs font-medium text-gray-500">PAS</span>
-							<span class="text-xl font-bold text-gray-900">{{
-								player.stats.passing
-							}}</span>
-						</div>
-						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-							<span class="text-xs font-medium text-gray-500">DEF</span>
-							<span class="text-xl font-bold text-gray-900">{{
-								player.stats.defending
-							}}</span>
-						</div>
-						<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-							<span class="text-xs font-medium text-gray-500">PHY</span>
-							<span class="text-xl font-bold text-gray-900">{{
-								player.stats.physical
-							}}</span>
-						</div>
-					</div>
-				</div> -->
 		</div>
 
 		<!-- エボリューション履歴 -->
@@ -174,6 +131,16 @@
 				>
 					<div
 						class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200"
+						@click="changeActiveStatus(index)"
+						:class="{
+							'border-2 border-blue-500': activeIndex === index,
+						}"
+						:style="{
+							'background-color':
+								activeIndex === index && !evolution.isEditing
+									? '#e0f7fa'
+									: '#ffffff',
+						}"
 					>
 						<div class="flex justify-between items-start mb-4">
 							<div class="flex-1">
@@ -350,7 +317,7 @@
 										}}</span>
 									</div>
 									<button
-										v-if="index === 0"
+										v-if="index === 0 && evolution.evolutionName !== '初期状態'"
 										@click="editEvolution(index)"
 										class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
 									>
@@ -436,7 +403,7 @@ interface Player {
 	evolutions: Evolution[];
 }
 
-// モックデータ
+// 選手データの初期値
 const player = ref<Player>({
 	id: '',
 	name: '',
@@ -451,6 +418,20 @@ const player = ref<Player>({
 		physical: 0,
 	},
 	evolutions: [],
+});
+
+// アクティブインデックス
+const activeIndex = ref<number>(0);
+
+// アクティブステータス
+const activeStatus = ref<Stats>({
+	overall: 0,
+	pace: 0,
+	shooting: 0,
+	passing: 0,
+	dribbling: 0,
+	defending: 0,
+	physical: 0,
 });
 
 // 選手データをAPIから取得
@@ -496,6 +477,21 @@ const fetchPlayerData = async () => {
 			},
 			evolutions: evolutions,
 		};
+
+		// アクティブステータスを初期化
+		activeStatus.value = {
+			overall: evolutions ? evolutions[0].overall : playerData.stats.overall,
+			pace: evolutions ? evolutions[0].pace : playerData.stats.pace,
+			shooting: evolutions ? evolutions[0].shooting : playerData.stats.shooting,
+			passing: evolutions ? evolutions[0].passing : playerData.stats.passing,
+			dribbling: evolutions
+				? evolutions[0].dribbling
+				: playerData.stats.dribbling,
+			defending: evolutions
+				? evolutions[0].defending
+				: playerData.stats.defending,
+			physical: evolutions ? evolutions[0].physical : playerData.stats.physical,
+		};
 	} catch (error) {
 		console.error('選手データ取得エラー:', error);
 	}
@@ -527,12 +523,12 @@ const chartData = computed(() => {
 			{
 				label: '現在の能力値',
 				data: [
-					Math.max(60, player.value.evolutions[0].pace || 0),
-					Math.max(60, player.value.evolutions[0].shooting || 0),
-					Math.max(60, player.value.evolutions[0].passing || 0),
-					Math.max(60, player.value.evolutions[0].dribbling || 0),
-					Math.max(60, player.value.evolutions[0].defending || 0),
-					Math.max(60, player.value.evolutions[0].physical || 0),
+					Math.max(60, activeStatus.value.pace || 0),
+					Math.max(60, activeStatus.value.shooting || 0),
+					Math.max(60, activeStatus.value.passing || 0),
+					Math.max(60, activeStatus.value.dribbling || 0),
+					Math.max(60, activeStatus.value.defending || 0),
+					Math.max(60, activeStatus.value.physical || 0),
 				],
 				backgroundColor: 'rgba(59, 130, 246, 0.2)',
 				borderColor: 'rgb(59, 130, 246)',
@@ -642,5 +638,23 @@ const cancelEvolution = (index: number) => {
 		return;
 	}
 	player.value.evolutions.splice(index, 1);
+};
+
+// アクティブステータス変更
+const changeActiveStatus = (index: number) => {
+	if (index === activeIndex.value) return;
+
+	console.log('changeActiveStatus', index);
+	activeStatus.value = {
+		overall: player.value.evolutions[index].overall,
+		pace: player.value.evolutions[index].pace,
+		shooting: player.value.evolutions[index].shooting,
+		passing: player.value.evolutions[index].passing,
+		dribbling: player.value.evolutions[index].dribbling,
+		defending: player.value.evolutions[index].defending,
+		physical: player.value.evolutions[index].physical,
+	};
+
+	activeIndex.value = index;
 };
 </script>
