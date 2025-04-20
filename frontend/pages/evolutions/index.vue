@@ -49,43 +49,57 @@
 								<div class="flex flex-col items-center">
 									<span class="text-xs font-medium text-gray-500">OVR</span>
 									<span class="text-base font-semibold text-gray-900">{{
-										player.stats.overall
+										player.latestEvolution
+											? player.latestEvolution.overall
+											: player.stats.overall
 									}}</span>
 								</div>
 								<div class="flex flex-col items-center">
 									<span class="text-xs font-medium text-gray-500">PAC</span>
 									<span class="text-base font-semibold text-gray-900">{{
-										player.stats.pace
+										player.latestEvolution
+											? player.latestEvolution.pace
+											: player.stats.pace
 									}}</span>
 								</div>
 								<div class="flex flex-col items-center">
 									<span class="text-xs font-medium text-gray-500">SHO</span>
 									<span class="text-base font-semibold text-gray-900">{{
-										player.stats.shooting
+										player.latestEvolution
+											? player.latestEvolution.shooting
+											: player.stats.shooting
 									}}</span>
 								</div>
 								<div class="flex flex-col items-center">
 									<span class="text-xs font-medium text-gray-500">PAS</span>
 									<span class="text-base font-semibold text-gray-900">{{
-										player.stats.passing
+										player.latestEvolution
+											? player.latestEvolution.passing
+											: player.stats.passing
 									}}</span>
 								</div>
 								<div class="flex flex-col items-center">
 									<span class="text-xs font-medium text-gray-500">DRI</span>
 									<span class="text-base font-semibold text-gray-900">{{
-										player.stats.dribbling
+										player.latestEvolution
+											? player.latestEvolution.dribbling
+											: player.stats.dribbling
 									}}</span>
 								</div>
 								<div class="flex flex-col items-center">
 									<span class="text-xs font-medium text-gray-500">DEF</span>
 									<span class="text-base font-semibold text-gray-900">{{
-										player.stats.defending
+										player.latestEvolution
+											? player.latestEvolution.defending
+											: player.stats.defending
 									}}</span>
 								</div>
 								<div class="flex flex-col items-center">
 									<span class="text-xs font-medium text-gray-500">PHY</span>
 									<span class="text-base font-semibold text-gray-900">{{
-										player.stats.physical
+										player.latestEvolution
+											? player.latestEvolution.physical
+											: player.stats.physical
 									}}</span>
 								</div>
 							</div>
@@ -130,6 +144,15 @@ interface Player {
 		defending: number;
 		physical: number;
 	};
+	latestEvolution: {
+		overall: number;
+		pace: number;
+		shooting: number;
+		passing: number;
+		dribbling: number;
+		defending: number;
+		physical: number;
+	};
 }
 
 const evolutionPlayers = ref<Player[]>([]);
@@ -140,7 +163,6 @@ const fetchEvolutionPlayers = async () => {
 		const response = await fetch(API_ENDPOINTS.EVOLUTIONS.LIST);
 		const data = await response.json();
 		evolutionPlayers.value = data;
-		console.log('エヴォリューション一覧:', evolutionPlayers.value);
 	} catch (error) {
 		console.error('エヴォリューション一覧一覧取得エラー:', error);
 	}
