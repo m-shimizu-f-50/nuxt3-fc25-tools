@@ -1,340 +1,370 @@
 <template>
-	<div class="container mx-auto px-4 py-8">
+	<div class="container mx-auto">
 		<div class="flex justify-between items-center mb-8">
 			<h1 class="text-3xl font-bold">エボリューション選手詳細</h1>
 		</div>
+		<div class="flex flex-col lg:flex-row gap-8">
+			<div class="w-full lg:w-5/12">
+				<!-- 基本情報カード -->
+				<div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+					<div class="gap-6">
+						<!-- 基本情報セクション -->
+						<div class="">
+							<h2 class="text-xl font-semibold mb-4">基本情報</h2>
+							<div class="flex space-x-8">
+								<div>
+									<dt class="text-sm font-medium text-gray-500">選手名</dt>
+									<dd class="mt-1 text-lg font-semibold text-gray-900">
+										{{ player.name }}
+									</dd>
+									<dt class="text-sm font-medium text-gray-500">ポジション</dt>
+									<dd class="mt-1 text-lg font-semibold text-gray-900">
+										{{ player.position }}
+									</dd>
+								</div>
 
-		<!-- 基本情報カード -->
-		<div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-			<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-				<!-- 基本情報セクション -->
-				<div class="lg:col-span-3">
-					<h2 class="text-xl font-semibold mb-4">基本情報</h2>
-					<div class="space-y-4">
-						<div>
-							<dt class="text-sm font-medium text-gray-500">選手名</dt>
-							<dd class="mt-1 text-lg font-semibold text-gray-900">
-								{{ player.name }}
-							</dd>
+								<div
+									class="m-5 flex flex-col items-center py-2 px-16 bg-gray-50 rounded-lg"
+								>
+									<span class="text-xs font-medium text-gray-500">OVR</span>
+									<span class="text-xl font-bold text-gray-900">{{
+										activeStatus.overall
+											? activeStatus.overall
+											: player.stats.overall
+									}}</span>
+								</div>
+							</div>
 						</div>
-						<div>
-							<dt class="text-sm font-medium text-gray-500">ポジション</dt>
-							<dd class="mt-1 text-lg font-semibold text-gray-900">
-								{{ player.position }}
-							</dd>
+
+						<!-- 能力値・レーダーチャートセクション -->
+						<div class="mt-10">
+							<!-- 数値表示 -->
+							<div class="grid grid-cols-3 gap-4">
+								<div
+									class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+								>
+									<span class="text-xs font-medium text-gray-500">PAC</span>
+									<span class="text-xl font-bold text-gray-900">{{
+										activeStatus.pace ? activeStatus.pace : player.stats.pace
+									}}</span>
+								</div>
+								<div
+									class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+								>
+									<span class="text-xs font-medium text-gray-500">SHO</span>
+									<span class="text-xl font-bold text-gray-900">{{
+										activeStatus.shooting
+											? activeStatus.shooting
+											: player.stats.shooting
+									}}</span>
+								</div>
+								<div
+									class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+								>
+									<span class="text-xs font-medium text-gray-500">PAS</span>
+									<span class="text-xl font-bold text-gray-900">{{
+										activeStatus.passing
+											? activeStatus.passing
+											: player.stats.passing
+									}}</span>
+								</div>
+								<div
+									class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+								>
+									<span class="text-xs font-medium text-gray-500">DRI</span>
+									<span class="text-xl font-bold text-gray-900">{{
+										activeStatus.dribbling
+											? activeStatus.dribbling
+											: player.stats.dribbling
+									}}</span>
+								</div>
+								<div
+									class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+								>
+									<span class="text-xs font-medium text-gray-500">DEF</span>
+									<span class="text-xl font-bold text-gray-900">{{
+										activeStatus.defending
+											? activeStatus.defending
+											: player.stats.defending
+									}}</span>
+								</div>
+								<div
+									class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+								>
+									<span class="text-xs font-medium text-gray-500">PHY</span>
+									<span class="text-xl font-bold text-gray-900">{{
+										player.evolutions[0]
+											? player.evolutions[0].physical
+											: player.stats.physical
+									}}</span>
+								</div>
+							</div>
+							<!-- レーダーチャート -->
+							<div class="mt-8 flex justify-center items-center w-full h-100">
+								<Radar :data="chartData" :options="chartOptions" />
+							</div>
 						</div>
-						<div>
-							<div
-								class="mt-4 flex flex-col items-center p-5 bg-gray-50 rounded-lg"
+					</div>
+				</div>
+			</div>
+
+			<div class="w-full lg:w-7/12">
+				<!-- エボリューション履歴 -->
+				<div class="space-y-6">
+					<div class="flex justify-between items-center">
+						<h2 class="text-xl font-semibold">エボリューション履歴</h2>
+						<button
+							@click="addNewEvolution"
+							class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center space-x-2"
+						>
+							<svg
+								class="w-5 h-5"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
 							>
-								<span class="text-xs font-medium text-gray-500">OVR</span>
-								<span class="text-xl font-bold text-gray-900">{{
-									activeStatus.overall
-										? activeStatus.overall
-										: player.stats.overall
-								}}</span>
-							</div>
-						</div>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 4v16m8-8H4"
+								></path>
+							</svg>
+							<span>新規追加</span>
+						</button>
 					</div>
-				</div>
-
-				<!-- 能力値・レーダーチャートセクション -->
-				<div class="lg:col-span-9">
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-						<!-- 数値表示 -->
-						<div class="grid grid-cols-3 gap-4">
-							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-								<span class="text-xs font-medium text-gray-500">PAC</span>
-								<span class="text-xl font-bold text-gray-900">{{
-									activeStatus.pace ? activeStatus.pace : player.stats.pace
-								}}</span>
-							</div>
-							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-								<span class="text-xs font-medium text-gray-500">SHO</span>
-								<span class="text-xl font-bold text-gray-900">{{
-									activeStatus.shooting
-										? activeStatus.shooting
-										: player.stats.shooting
-								}}</span>
-							</div>
-							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-								<span class="text-xs font-medium text-gray-500">PAS</span>
-								<span class="text-xl font-bold text-gray-900">{{
-									activeStatus.passing
-										? activeStatus.passing
-										: player.stats.passing
-								}}</span>
-							</div>
-							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-								<span class="text-xs font-medium text-gray-500">DRI</span>
-								<span class="text-xl font-bold text-gray-900">{{
-									activeStatus.dribbling
-										? activeStatus.dribbling
-										: player.stats.dribbling
-								}}</span>
-							</div>
-							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-								<span class="text-xs font-medium text-gray-500">DEF</span>
-								<span class="text-xl font-bold text-gray-900">{{
-									activeStatus.defending
-										? activeStatus.defending
-										: player.stats.defending
-								}}</span>
-							</div>
-							<div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-								<span class="text-xs font-medium text-gray-500">PHY</span>
-								<span class="text-xl font-bold text-gray-900">{{
-									player.evolutions[0]
-										? player.evolutions[0].physical
-										: player.stats.physical
-								}}</span>
-							</div>
-						</div>
-						<!-- レーダーチャート -->
-						<div class="flex justify-center items-center w-full h-100">
-							<Radar :data="chartData" :options="chartOptions" />
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- エボリューション履歴 -->
-		<div class="space-y-6">
-			<div class="flex justify-between items-center">
-				<h2 class="text-xl font-semibold">エボリューション履歴</h2>
-				<button
-					@click="addNewEvolution"
-					class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center space-x-2"
-				>
-					<svg
-						class="w-5 h-5"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v16m8-8H4"
-						></path>
-					</svg>
-					<span>新規追加</span>
-				</button>
-			</div>
-			<div class="space-y-12">
-				<div
-					v-for="(evolution, index) in player.evolutions"
-					:key="evolution.id"
-					class="relative"
-				>
-					<div
-						class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200"
-						@click="changeActiveStatus(index)"
-						:class="{
-							'border-2 border-blue-500': activeIndex === index,
-						}"
-						:style="{
-							'background-color':
-								activeIndex === index && !evolution.isEditing
-									? '#e0f7fa'
-									: '#ffffff',
-						}"
-					>
-						<div class="flex justify-between items-start mb-4">
-							<div class="flex-1">
-								<template v-if="evolution.isEditing">
-									<input
-										v-model="evolution.evolutionName"
-										type="text"
-										class="w-full px-3 py-2 border rounded-md mb-4"
-										placeholder="エボリューション名"
-									/>
-									<div class="grid grid-cols-3 md:grid-cols-7 gap-3">
-										<div
-											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
-										>
-											<span class="text-xs font-medium text-gray-500 mb-1"
-												>OVR</span
-											>
+					<div class="space-y-12">
+						<div
+							v-for="(evolution, index) in player.evolutions"
+							:key="evolution.id"
+							class="relative"
+						>
+							<div
+								class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200"
+								@click="changeActiveStatus(index)"
+								:class="{
+									'border-2 border-blue-500': activeIndex === index,
+								}"
+								:style="{
+									'background-color':
+										activeIndex === index && !evolution.isEditing
+											? '#e0f7fa'
+											: '#ffffff',
+								}"
+							>
+								<div class="flex justify-between items-start mb-4">
+									<div class="flex-1">
+										<template v-if="evolution.isEditing">
 											<input
-												v-model.number="evolution.overall"
-												type="number"
-												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
-												min="0"
-												max="99"
+												v-model="evolution.evolutionName"
+												type="text"
+												class="w-full px-3 py-2 border rounded-md mb-4"
+												placeholder="エボリューション名"
 											/>
-										</div>
-										<div
-											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
-										>
-											<span class="text-xs font-medium text-gray-500 mb-1"
-												>PAC</span
-											>
-											<input
-												v-model.number="evolution.pace"
-												type="number"
-												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
-												min="0"
-												max="99"
-											/>
-										</div>
-										<div
-											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
-										>
-											<span class="text-xs font-medium text-gray-500 mb-1"
-												>SHO</span
-											>
-											<input
-												v-model.number="evolution.shooting"
-												type="number"
-												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
-												min="0"
-												max="99"
-											/>
-										</div>
-										<div
-											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
-										>
-											<span class="text-xs font-medium text-gray-500 mb-1"
-												>PAS</span
-											>
-											<input
-												v-model.number="evolution.passing"
-												type="number"
-												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
-												min="0"
-												max="99"
-											/>
-										</div>
-										<div
-											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
-										>
-											<span class="text-xs font-medium text-gray-500 mb-1"
-												>DRI</span
-											>
-											<input
-												v-model.number="evolution.dribbling"
-												type="number"
-												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
-												min="0"
-												max="99"
-											/>
-										</div>
-										<div
-											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
-										>
-											<span class="text-xs font-medium text-gray-500 mb-1"
-												>DEF</span
-											>
-											<input
-												v-model.number="evolution.defending"
-												type="number"
-												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
-												min="0"
-												max="99"
-											/>
-										</div>
-										<div
-											class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
-										>
-											<span class="text-xs font-medium text-gray-500 mb-1"
-												>PHY</span
-											>
-											<input
-												v-model.number="evolution.physical"
-												type="number"
-												class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
-												min="0"
-												max="99"
-											/>
-										</div>
+											<div class="grid grid-cols-3 md:grid-cols-7 gap-3">
+												<div
+													class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+												>
+													<span class="text-xs font-medium text-gray-500 mb-1"
+														>OVR</span
+													>
+													<input
+														v-model.number="evolution.overall"
+														type="number"
+														class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
+														min="0"
+														max="99"
+													/>
+												</div>
+												<div
+													class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+												>
+													<span class="text-xs font-medium text-gray-500 mb-1"
+														>PAC</span
+													>
+													<input
+														v-model.number="evolution.pace"
+														type="number"
+														class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
+														min="0"
+														max="99"
+													/>
+												</div>
+												<div
+													class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+												>
+													<span class="text-xs font-medium text-gray-500 mb-1"
+														>SHO</span
+													>
+													<input
+														v-model.number="evolution.shooting"
+														type="number"
+														class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
+														min="0"
+														max="99"
+													/>
+												</div>
+												<div
+													class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+												>
+													<span class="text-xs font-medium text-gray-500 mb-1"
+														>PAS</span
+													>
+													<input
+														v-model.number="evolution.passing"
+														type="number"
+														class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
+														min="0"
+														max="99"
+													/>
+												</div>
+												<div
+													class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+												>
+													<span class="text-xs font-medium text-gray-500 mb-1"
+														>DRI</span
+													>
+													<input
+														v-model.number="evolution.dribbling"
+														type="number"
+														class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
+														min="0"
+														max="99"
+													/>
+												</div>
+												<div
+													class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+												>
+													<span class="text-xs font-medium text-gray-500 mb-1"
+														>DEF</span
+													>
+													<input
+														v-model.number="evolution.defending"
+														type="number"
+														class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
+														min="0"
+														max="99"
+													/>
+												</div>
+												<div
+													class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+												>
+													<span class="text-xs font-medium text-gray-500 mb-1"
+														>PHY</span
+													>
+													<input
+														v-model.number="evolution.physical"
+														type="number"
+														class="w-full px-2 py-1 border rounded-md text-center text-lg font-bold"
+														min="0"
+														max="99"
+													/>
+												</div>
+											</div>
+											<div class="flex justify-end space-x-2 mt-4">
+												<button
+													@click="saveEvolution(index)"
+													class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+												>
+													保存
+												</button>
+												<button
+													@click="cancelEvolution(index)"
+													class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+												>
+													キャンセル
+												</button>
+											</div>
+										</template>
+										<template v-else>
+											<h3 class="text-lg font-semibold text-gray-900">
+												{{ evolution.evolutionName }}
+											</h3>
+										</template>
 									</div>
-									<div class="flex justify-end space-x-2 mt-4">
-										<button
-											@click="saveEvolution(index)"
-											class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-										>
-											保存
-										</button>
-										<button
-											@click="cancelEvolution(index)"
-											class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-										>
-											キャンセル
-										</button>
+									<div class="flex items-center space-x-4">
+										<template v-if="!evolution.isEditing">
+											<div class="flex flex-col items-center">
+												<span class="text-xs font-medium text-gray-500"
+													>OVR</span
+												>
+												<span class="text-lg font-bold text-gray-900">{{
+													evolution.overall
+												}}</span>
+											</div>
+											<div class="flex flex-col items-center">
+												<span class="text-xs font-medium text-gray-500"
+													>PAC</span
+												>
+												<span class="text-lg font-bold text-gray-900">{{
+													evolution.pace
+												}}</span>
+											</div>
+											<div class="flex flex-col items-center">
+												<span class="text-xs font-medium text-gray-500"
+													>SHO</span
+												>
+												<span class="text-lg font-bold text-gray-900">{{
+													evolution.shooting
+												}}</span>
+											</div>
+											<div class="flex flex-col items-center">
+												<span class="text-xs font-medium text-gray-500"
+													>PAS</span
+												>
+												<span class="text-lg font-bold text-gray-900">{{
+													evolution.passing
+												}}</span>
+											</div>
+											<div class="flex flex-col items-center">
+												<span class="text-xs font-medium text-gray-500"
+													>DRI</span
+												>
+												<span class="text-lg font-bold text-gray-900">{{
+													evolution.dribbling
+												}}</span>
+											</div>
+											<div class="flex flex-col items-center">
+												<span class="text-xs font-medium text-gray-500"
+													>DEF</span
+												>
+												<span class="text-lg font-bold text-gray-900">{{
+													evolution.defending
+												}}</span>
+											</div>
+											<div class="flex flex-col items-center">
+												<span class="text-xs font-medium text-gray-500"
+													>PHY</span
+												>
+												<span class="text-lg font-bold text-gray-900">{{
+													evolution.physical
+												}}</span>
+											</div>
+											<button
+												v-if="
+													index === 0 && evolution.evolutionName !== '初期状態'
+												"
+												@click="editEvolution(index)"
+												class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+											>
+												編集
+											</button>
+										</template>
 									</div>
-								</template>
-								<template v-else>
-									<h3 class="text-lg font-semibold text-gray-900">
-										{{ evolution.evolutionName }}
-									</h3>
-								</template>
+								</div>
 							</div>
-							<div class="flex items-center space-x-4">
-								<template v-if="!evolution.isEditing">
-									<div class="flex flex-col items-center">
-										<span class="text-xs font-medium text-gray-500">OVR</span>
-										<span class="text-lg font-bold text-gray-900">{{
-											evolution.overall
-										}}</span>
-									</div>
-									<div class="flex flex-col items-center">
-										<span class="text-xs font-medium text-gray-500">PAC</span>
-										<span class="text-lg font-bold text-gray-900">{{
-											evolution.pace
-										}}</span>
-									</div>
-									<div class="flex flex-col items-center">
-										<span class="text-xs font-medium text-gray-500">SHO</span>
-										<span class="text-lg font-bold text-gray-900">{{
-											evolution.shooting
-										}}</span>
-									</div>
-									<div class="flex flex-col items-center">
-										<span class="text-xs font-medium text-gray-500">PAS</span>
-										<span class="text-lg font-bold text-gray-900">{{
-											evolution.passing
-										}}</span>
-									</div>
-									<div class="flex flex-col items-center">
-										<span class="text-xs font-medium text-gray-500">DRI</span>
-										<span class="text-lg font-bold text-gray-900">{{
-											evolution.dribbling
-										}}</span>
-									</div>
-									<div class="flex flex-col items-center">
-										<span class="text-xs font-medium text-gray-500">DEF</span>
-										<span class="text-lg font-bold text-gray-900">{{
-											evolution.defending
-										}}</span>
-									</div>
-									<div class="flex flex-col items-center">
-										<span class="text-xs font-medium text-gray-500">PHY</span>
-										<span class="text-lg font-bold text-gray-900">{{
-											evolution.physical
-										}}</span>
-									</div>
-									<button
-										v-if="index === 0 && evolution.evolutionName !== '初期状態'"
-										@click="editEvolution(index)"
-										class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-									>
-										編集
-									</button>
-								</template>
+							<!-- 矢印アイコン -->
+							<div
+								v-if="index < player.evolutions.length - 1"
+								class="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+								style="top: calc(100% + 1.5rem)"
+							>
+								<div
+									class="relative w-20 h-20 flex items-center justify-center"
+								>
+									<img src="~/assets/images/arrow-down.png" alt="下向き矢印" />
+								</div>
 							</div>
-						</div>
-					</div>
-					<!-- 矢印アイコン -->
-					<div
-						v-if="index < player.evolutions.length - 1"
-						class="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-						style="top: calc(100% + 1.5rem)"
-					>
-						<div class="relative w-20 h-20 flex items-center justify-center">
-							<img src="~/assets/images/arrow-down.png" alt="下向き矢印" />
 						</div>
 					</div>
 				</div>
