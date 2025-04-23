@@ -28,10 +28,13 @@
 								>
 									<span class="text-xs font-medium text-gray-500">OVR</span>
 									<span class="text-xl font-bold text-gray-900">{{
+										displayValues.overall
+									}}</span>
+									<!-- <span class="text-xl font-bold text-gray-900">{{
 										activeStatus.overall
 											? activeStatus.overall
 											: player.stats.overall
-									}}</span>
+									}}</span> -->
 								</div>
 							</div>
 						</div>
@@ -374,7 +377,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { API_ENDPOINTS } from '~/constants/api';
 import { Radar } from 'vue-chartjs';
 import {
@@ -670,12 +673,33 @@ const cancelEvolution = (index: number) => {
 	player.value.evolutions.splice(index, 1);
 };
 
+// // アクティブステータス変更
+// const changeActiveStatus = (index: number) => {
+// 	if (index === activeIndex.value) return;
+
+// 	console.log('changeActiveStatus', index);
+// 	activeStatus.value = {
+// 		overall: player.value.evolutions[index].overall,
+// 		pace: player.value.evolutions[index].pace,
+// 		shooting: player.value.evolutions[index].shooting,
+// 		passing: player.value.evolutions[index].passing,
+// 		dribbling: player.value.evolutions[index].dribbling,
+// 		defending: player.value.evolutions[index].defending,
+// 		physical: player.value.evolutions[index].physical,
+// 	};
+
+// 	activeIndex.value = index;
+// };
+
+// アニメーション更新関数
 // アクティブステータス変更
 const changeActiveStatus = (index: number) => {
 	if (index === activeIndex.value) return;
 
 	console.log('changeActiveStatus', index);
-	activeStatus.value = {
+
+	// 新しいステータスを設定
+	const newStatus = {
 		overall: player.value.evolutions[index].overall,
 		pace: player.value.evolutions[index].pace,
 		shooting: player.value.evolutions[index].shooting,
@@ -685,6 +709,105 @@ const changeActiveStatus = (index: number) => {
 		physical: player.value.evolutions[index].physical,
 	};
 
+	// アクティブステータスを即座に更新
+	activeStatus.value = newStatus;
 	activeIndex.value = index;
+
+	// アニメーション開始時間を記録
+	const startTime = performance.now();
+	const duration = 1000; // アニメーション時間（ミリ秒）
+
+	// アニメーション更新関数
+	const updateAnimation = (currentTime: number) => {
+		const elapsed = currentTime - startTime;
+		const progress = Math.min(elapsed / duration, 1);
+
+		// イージング関数（スムーズな変化）
+		const easedProgress =
+			progress < 0.5
+				? 2 * progress * progress
+				: -1 + (4 - 2 * progress) * progress;
+
+		// 各ステータスを同時に更新
+		const stats = [
+			'overall',
+			'pace',
+			'shooting',
+			'passing',
+			'dribbling',
+			'defending',
+			'physical',
+		];
+		stats.forEach((stat) => {
+			const startValue = displayValues.value[stat];
+			const endValue = newStatus[stat];
+			const currentValue = Math.round(
+				startValue + (endValue - startValue) * easedProgress
+			);
+			displayValues.value[stat] = currentValue;
+		});
+
+		if (progress < 1) {
+			requestAnimationFrame(updateAnimation);
+		} else {
+			// アニメーション終了時に最終値を設定
+			activeStatus.value = newStatus;
+			activeIndex.value = index;
+		}
+	};
+
+	// アニメーションを開始
+	requestAnimationFrame(updateAnimation);
 };
+
+// アニメーション用の関数
+const animateValue = (
+	start: number,
+	end: number,
+	duration: number,
+	callback: (value: number) => void
+) => {
+	const startTime = performance.now();
+	const updateValue = (currentTime: number) => {
+		const elapsed = currentTime - startTime;
+		const progress = Math.min(elapsed / duration, 1);
+
+		// イージング関数（スムーズな変化）
+		const easedProgress =
+			progress < 0.5
+				? 2 * progress * progress
+				: -1 + (4 - 2 * progress) * progress;
+
+		const currentValue = Math.round(start + (end - start) * easedProgress);
+		callback(currentValue);
+
+		if (progress < 1) {
+			requestAnimationFrame(updateValue);
+		}
+	};
+	requestAnimationFrame(updateValue);
+};
+
+const displayValues = ref({
+	overall: 0,
+	pace: 0,
+	shooting: 0,
+	passing: 0,
+	dribbling: 0,
+	defending: 0,
+	physical: 0,
+});
+
+// 初期値を設定
+onMounted(() => {
+	displayValues.value = {
+		overall: activeStatus.value.overall,
+		pace: activeStatus.value.pace,
+		shooting: activeStatus.value.shooting,
+		passing: activeStatus.value.passing,
+		dribbling: activeStatus.value.dribbling,
+		defending: activeStatus.value.defending,
+		physical: activeStatus.value.physical,
+	};
+});
 </script>
