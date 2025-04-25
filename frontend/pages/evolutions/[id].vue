@@ -97,7 +97,7 @@
 								</div>
 								<!-- レーダーチャート -->
 								<div class="mt-8 flex justify-center items-center w-full h-100">
-									<Radar :data="chartData" :options="chartOptions" />
+									<PlayerEvolutionRadarChart :stats="activeStatus" />
 								</div>
 							</div>
 						</div>
@@ -375,29 +375,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref } from 'vue';
 import { API_ENDPOINTS } from '~/constants/api';
-import { Radar } from 'vue-chartjs';
-import {
-	Chart as ChartJS,
-	RadialLinearScale,
-	PointElement,
-	LineElement,
-	Filler,
-	Tooltip,
-	Legend,
-} from 'chart.js';
+import PlayerEvolutionRadarChart from '~/components/PlayerEvolutionRadarChart.vue';
 import axios from 'axios';
 import { useToast } from 'vue-toastification';
-
-ChartJS.register(
-	RadialLinearScale,
-	PointElement,
-	LineElement,
-	Filler,
-	Tooltip,
-	Legend
-);
 
 const route = useRoute();
 const toast = useToast();
@@ -558,67 +540,6 @@ const fetchPlayerData = async () => {
 
 fetchPlayerData();
 
-// レーダーチャートのデータ
-const chartData = computed(() => {
-	// player.valueが存在しない、またはevolutionsが存在しない場合はデフォルト値を返す
-	if (!player.value?.evolutions?.length) {
-		return {
-			labels: ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'],
-			datasets: [
-				{
-					label: '現在の能力値',
-					data: [0, 0, 0, 0, 0, 0],
-					backgroundColor: 'rgba(59, 130, 246, 0.2)',
-					borderColor: 'rgb(59, 130, 246)',
-					borderWidth: 2,
-				},
-			],
-		};
-	}
-
-	return {
-		labels: ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'],
-		datasets: [
-			{
-				label: '現在の能力値',
-				data: [
-					Math.max(60, activeStatus.value.pace || 0),
-					Math.max(60, activeStatus.value.shooting || 0),
-					Math.max(60, activeStatus.value.passing || 0),
-					Math.max(60, activeStatus.value.dribbling || 0),
-					Math.max(60, activeStatus.value.defending || 0),
-					Math.max(60, activeStatus.value.physical || 0),
-				],
-				backgroundColor: 'rgba(59, 130, 246, 0.2)',
-				borderColor: 'rgb(59, 130, 246)',
-				borderWidth: 2,
-			},
-		],
-	};
-});
-
-// レーダーチャートのオプション
-const chartOptions = {
-	scales: {
-		r: {
-			beginAtZero: false,
-			min: 50,
-			max: 99,
-			ticks: {
-				stepSize: 5,
-			},
-			grid: {
-				color: 'rgba(0, 0, 0, 0.1)',
-			},
-		},
-	},
-	plugins: {
-		legend: {
-			display: false,
-		},
-	},
-};
-
 // 新規エボリューション追加
 const addNewEvolution = () => {
 	const newEvolution: Evolution = {
@@ -763,33 +684,5 @@ const changeActiveStatus = (index: number) => {
 
 	// アニメーションを開始
 	requestAnimationFrame(updateAnimation);
-};
-
-// アニメーション用の関数
-const animateValue = (
-	start: number,
-	end: number,
-	duration: number,
-	callback: (value: number) => void
-) => {
-	const startTime = performance.now();
-	const updateValue = (currentTime: number) => {
-		const elapsed = currentTime - startTime;
-		const progress = Math.min(elapsed / duration, 1);
-
-		// イージング関数（スムーズな変化）
-		const easedProgress =
-			progress < 0.5
-				? 2 * progress * progress
-				: -1 + (4 - 2 * progress) * progress;
-
-		const currentValue = Math.round(start + (end - start) * easedProgress);
-		callback(currentValue);
-
-		if (progress < 1) {
-			requestAnimationFrame(updateValue);
-		}
-	};
-	requestAnimationFrame(updateValue);
 };
 </script>
