@@ -129,7 +129,8 @@
 
 <script setup lang="ts">
 import { API_ENDPOINTS } from '~/constants/api';
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
+import { useToast } from 'vue-toastification';
 
 interface Player {
 	id: string;
@@ -156,6 +157,7 @@ interface Player {
 }
 
 const evolutionPlayers = ref<Player[]>([]);
+const toast = useToast();
 
 // 大会一覧を取得する関数
 const fetchEvolutionPlayers = async () => {
@@ -177,10 +179,10 @@ const onDeletePlayer = async (id: string) => {
 				method: 'DELETE',
 			});
 			if (response.ok) {
-				alert('選手を削除しました');
+				toast.success(`エボリューション選手を削除しました`);
 				fetchEvolutionPlayers();
 			} else {
-				alert('選手の削除に失敗しました');
+				toast.error('選手の削除に失敗しました');
 			}
 		} catch (error) {
 			console.error('選手削除エラー:', error);
