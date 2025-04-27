@@ -1,5 +1,7 @@
 <template>
 	<div class="container mx-auto px-4 py-8">
+		<!-- パンくずリスト -->
+		<Breadcrumb :items="breadcrumbItems" />
 		<div class="flex justify-between items-center mb-8">
 			<h1 class="text-3xl font-bold">エボリューション選手一覧</h1>
 			<button
@@ -158,6 +160,13 @@ interface Player {
 
 const evolutionPlayers = ref<Player[]>([]);
 const toast = useToast();
+
+// パンくずリスト
+const breadcrumbItems = [
+	{
+		name: 'EVO選手一覧',
+	},
+];
 
 // 大会一覧を取得する関数
 const fetchEvolutionPlayers = async () => {
