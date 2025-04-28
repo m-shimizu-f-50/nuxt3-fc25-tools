@@ -1,5 +1,7 @@
 <template>
 	<div class="container mx-auto">
+		<!-- パンくずリスト -->
+		<Breadcrumb :items="breadcrumbItems" />
 		<div v-if="isLoading" class="flex justify-center items-center h-64">
 			<div
 				class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"
@@ -378,6 +380,7 @@
 import { ref } from 'vue';
 import { API_ENDPOINTS } from '~/constants/api';
 import PlayerEvolutionRadarChart from '~/components/PlayerEvolutionRadarChart.vue';
+import Breadcrumb from '~/components/Breadcrumb.vue';
 import axios from 'axios';
 import { useToast } from 'vue-toastification';
 
@@ -415,6 +418,17 @@ interface Player {
 	stats: Stats;
 	evolutions: Evolution[];
 }
+
+// パンくずリスト
+const breadcrumbItems = [
+	{
+		name: 'EVO選手一覧',
+		path: '/evolutions',
+	},
+	{
+		name: 'EVO選手詳細',
+	},
+];
 
 // ローディング状態
 const isLoading = ref<boolean>(true);
