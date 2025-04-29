@@ -38,7 +38,7 @@ const toast = useToast();
 const breadcrumbItems = [
 	{
 		name: '大会一覧',
-		link: '/tournaments',
+		path: '/tournaments',
 	},
 	{
 		name: '大会詳細',
