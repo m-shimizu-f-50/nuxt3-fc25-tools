@@ -1,5 +1,5 @@
 <template>
-	<header class="bg-gray-300 text-white p-4 shadow-md">
+	<header class="bg-gray-300 text-white p-4 shadow-md fixed top-0 w-full z-50">
 		<div class="container mx-auto flex justify-between items-center">
 			<NuxtLink to="/" class="text-xl font-bold">FC25</NuxtLink>
 			<nav>
