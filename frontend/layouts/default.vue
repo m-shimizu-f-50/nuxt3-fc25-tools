@@ -9,7 +9,7 @@ import Footer from '~/components/Footer.vue';
 		<Header />
 
 		<!-- メインコンテンツ -->
-		<main class="flex-1 container mx-auto p-6">
+		<main class="flex-1 container mx-auto mt-20">
 			<slot />
 		</main>
 
