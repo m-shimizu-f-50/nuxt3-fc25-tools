@@ -1,5 +1,7 @@
 <template>
 	<div class="container mx-auto px-4 py-8">
+		<!-- パンくずリスト -->
+		<Breadcrumb :items="breadcrumbItems" />
 		<div class="flex justify-between items-center mb-8">
 			<h1 class="text-3xl font-bold">新規エボリューション選手登録</h1>
 			<button
@@ -204,6 +206,18 @@ interface PlayerForm {
 
 const router = useRouter();
 const toast = useToast();
+
+// パンくずリスト
+const breadcrumbItems = [
+	{
+		name: 'EVO選手一覧',
+		path: '/evolutions',
+	},
+	{
+		name: 'EVO選手登録',
+	},
+];
+
 const form = ref<PlayerForm>({
 	name: '',
 	position: 'FW',
