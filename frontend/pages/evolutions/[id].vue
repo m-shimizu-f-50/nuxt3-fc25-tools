@@ -14,7 +14,9 @@
 			<div class="flex flex-col lg:flex-row gap-8">
 				<div class="w-full lg:w-5/12">
 					<!-- 基本情報カード -->
-					<div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+					<div
+						class="bg-white rounded-lg shadow-lg p-6 mb-8 fixed top-50 left-10 z-50 w-4/12"
+					>
 						<div class="gap-6">
 							<!-- 基本情報セクション -->
 							<div class="">
