@@ -8,20 +8,20 @@
 			></div>
 		</div>
 		<div v-else>
-			<div class="flex justify-between items-center mb-8">
+			<div class="flex justify-between items-center mb-4">
 				<h1 class="text-3xl font-bold">エボリューション選手詳細</h1>
 			</div>
 			<div class="flex flex-col lg:flex-row gap-8">
 				<div class="w-full lg:w-5/12">
 					<!-- 基本情報カード -->
 					<div
-						class="bg-white rounded-lg shadow-lg p-6 mb-8 fixed top-50 left-10 z-50 w-4/12"
+						class="bg-white rounded-lg shadow-lg p-6 lg:fixed lg:top-50 lg:left-12 z-50 lg:w-4/12"
 					>
 						<div class="gap-6">
 							<!-- 基本情報セクション -->
 							<div class="">
-								<h2 class="text-xl font-semibold mb-4">基本情報</h2>
-								<div class="flex space-x-8">
+								<!-- <h2 class="text-xl font-semibold mb-2">基本情報</h2> -->
+								<div class="flex space-x-4">
 									<div>
 										<dt class="text-sm font-medium text-gray-500">選手名</dt>
 										<dd class="mt-1 text-lg font-semibold text-gray-900">
@@ -47,9 +47,9 @@
 							</div>
 
 							<!-- 能力値・レーダーチャートセクション -->
-							<div class="mt-10">
+							<div class="mt-4">
 								<!-- 数値表示 -->
-								<div class="grid grid-cols-3 gap-4">
+								<div class="grid grid-cols-3 gap-2">
 									<div
 										class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
 									>
@@ -100,7 +100,7 @@
 									</div>
 								</div>
 								<!-- レーダーチャート -->
-								<div class="mt-8 flex justify-center items-center w-full h-100">
+								<div class="flex justify-center items-center w-full h-100">
 									<PlayerEvolutionRadarChart :stats="activeStatus" />
 								</div>
 							</div>
