@@ -15,7 +15,7 @@
 				<div class="w-full lg:w-5/12">
 					<!-- 基本情報カード -->
 					<div
-						class="bg-white rounded-lg shadow-lg p-6 lg:fixed lg:top-50 lg:left-12 z-50 lg:w-4/12"
+						class="bg-white rounded-lg shadow-lg p-6 lg:fixed lg:top-48 lg:left-12 z-50 lg:w-4/12"
 					>
 						<div class="gap-6">
 							<!-- 基本情報セクション -->
@@ -49,7 +49,7 @@
 							<!-- 能力値・レーダーチャートセクション -->
 							<div class="mt-4">
 								<!-- 数値表示 -->
-								<div class="grid grid-cols-3 gap-2">
+								<div class="grid grid-cols-3 gap-2 mb-4">
 									<div
 										class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
 									>
@@ -100,9 +100,8 @@
 									</div>
 								</div>
 								<!-- レーダーチャート -->
-								<div class="flex justify-center items-center w-full h-100">
-									<PlayerEvolutionRadarChart :stats="activeStatus" />
-								</div>
+
+								<PlayerEvolutionRadarChart :stats="activeStatus" />
 							</div>
 						</div>
 					</div>
