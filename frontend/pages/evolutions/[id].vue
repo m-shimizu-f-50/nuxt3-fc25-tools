@@ -476,6 +476,101 @@ const displayValues = ref<Stats>({
 	physical: 0,
 });
 
+// アニメーション更新関数
+const isAnimating = ref(false);
+const pendingIndex = ref<number | null>(null);
+const debounceTimeout = ref<number | null>(null);
+
+const changeActiveStatus = (index: number) => {
+	if (index === activeIndex.value) return;
+
+	// アニメーション中の場合
+	if (isAnimating.value) {
+		// 保留中のインデックスを更新
+		pendingIndex.value = index;
+		return;
+	}
+
+	// デバウンス処理
+	if (debounceTimeout.value) {
+		clearTimeout(debounceTimeout.value);
+	}
+
+	debounceTimeout.value = window.setTimeout(() => {
+		// 新しいステータスを設定
+		const newStatus = {
+			overall: player.value.evolutions[index].overall,
+			pace: player.value.evolutions[index].pace,
+			shooting: player.value.evolutions[index].shooting,
+			passing: player.value.evolutions[index].passing,
+			dribbling: player.value.evolutions[index].dribbling,
+			defending: player.value.evolutions[index].defending,
+			physical: player.value.evolutions[index].physical,
+		};
+
+		// アクティブステータスを即座に更新
+		activeStatus.value = newStatus;
+		activeIndex.value = index;
+
+		// アニメーション開始時間を記録
+		const startTime = performance.now();
+		const duration = 1000; // アニメーション時間（ミリ秒）
+
+		// アニメーション開始
+		isAnimating.value = true;
+
+		// アニメーション更新関数
+		const updateAnimation = (currentTime: number) => {
+			const elapsed = currentTime - startTime;
+			const progress = Math.min(elapsed / duration, 1);
+
+			// イージング関数（スムーズな変化）
+			const easedProgress =
+				progress < 0.5
+					? 2 * progress * progress
+					: -1 + (4 - 2 * progress) * progress;
+
+			// 各ステータスを同時に更新
+			const stats = [
+				'overall',
+				'pace',
+				'shooting',
+				'passing',
+				'dribbling',
+				'defending',
+				'physical',
+			] as const;
+			stats.forEach((stat) => {
+				const startValue = displayValues.value[stat];
+				const endValue = newStatus[stat];
+				const currentValue = Math.round(
+					startValue + (endValue - startValue) * easedProgress
+				);
+				displayValues.value[stat] = currentValue;
+			});
+
+			if (progress < 1) {
+				requestAnimationFrame(updateAnimation);
+			} else {
+				// アニメーション終了時に最終値を設定
+				activeStatus.value = newStatus;
+				activeIndex.value = index;
+				isAnimating.value = false;
+
+				// 保留中のインデックスがある場合は、そのインデックスに対してアニメーションを開始
+				if (pendingIndex.value !== null) {
+					const nextIndex = pendingIndex.value;
+					pendingIndex.value = null;
+					changeActiveStatus(nextIndex);
+				}
+			}
+		};
+
+		// アニメーションを開始
+		requestAnimationFrame(updateAnimation);
+	}, 300); // 300ミリ秒のデバウンス時間
+};
+
 // 選手データをAPIから取得
 const fetchPlayerData = async () => {
 	try {
@@ -633,71 +728,5 @@ const cancelEvolution = (index: number) => {
 		return;
 	}
 	player.value.evolutions.splice(index, 1);
-};
-
-// アニメーション更新関数
-const changeActiveStatus = (index: number) => {
-	if (index === activeIndex.value) return;
-
-	// 新しいステータスを設定
-	const newStatus = {
-		overall: player.value.evolutions[index].overall,
-		pace: player.value.evolutions[index].pace,
-		shooting: player.value.evolutions[index].shooting,
-		passing: player.value.evolutions[index].passing,
-		dribbling: player.value.evolutions[index].dribbling,
-		defending: player.value.evolutions[index].defending,
-		physical: player.value.evolutions[index].physical,
-	};
-
-	// アクティブステータスを即座に更新
-	activeStatus.value = newStatus;
-	activeIndex.value = index;
-
-	// アニメーション開始時間を記録
-	const startTime = performance.now();
-	const duration = 1000; // アニメーション時間（ミリ秒）
-
-	// アニメーション更新関数
-	const updateAnimation = (currentTime: number) => {
-		const elapsed = currentTime - startTime;
-		const progress = Math.min(elapsed / duration, 1);
-
-		// イージング関数（スムーズな変化）
-		const easedProgress =
-			progress < 0.5
-				? 2 * progress * progress
-				: -1 + (4 - 2 * progress) * progress;
-
-		// 各ステータスを同時に更新
-		const stats = [
-			'overall',
-			'pace',
-			'shooting',
-			'passing',
-			'dribbling',
-			'defending',
-			'physical',
-		];
-		stats.forEach((stat) => {
-			const startValue = displayValues.value[stat];
-			const endValue = newStatus[stat];
-			const currentValue = Math.round(
-				startValue + (endValue - startValue) * easedProgress
-			);
-			displayValues.value[stat] = currentValue;
-		});
-
-		if (progress < 1) {
-			requestAnimationFrame(updateAnimation);
-		} else {
-			// アニメーション終了時に最終値を設定
-			activeStatus.value = newStatus;
-			activeIndex.value = index;
-		}
-	};
-
-	// アニメーションを開始
-	requestAnimationFrame(updateAnimation);
 };
 </script>
