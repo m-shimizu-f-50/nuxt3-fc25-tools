@@ -380,7 +380,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { API_ENDPOINTS } from '~/constants/api';
-import PlayerEvolutionRadarChart from '~/components/PlayerEvolutionRadarChart.vue';
+import PlayerEvolutionRadarChart from '~/components/charts/PlayerEvolutionRadarChart.vue';
 import Breadcrumb from '~/components/Breadcrumb.vue';
 import axios from 'axios';
 import { useToast } from 'vue-toastification';
