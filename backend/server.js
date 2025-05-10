@@ -4,6 +4,7 @@ const mysql = require('mysql2');
 const cors = require('cors');
 const tournamentsRouter = require('./routes/tournaments');
 const evolutionsRouter = require('./routes/evolutions');
+const dashboardRouter = require('./routes/dashboard');
 
 const app = express();
 const port = 8890;
@@ -38,6 +39,8 @@ db.connect((err) => {
 // JSONリクエストボディのパース
 app.use(express.json());
 
+// ダッシュボードルート
+app.use('/api/dashboard', dashboardRouter);
 // 大会ルート
 app.use('/api/tournaments', tournamentsRouter);
 // エボリューションルート
