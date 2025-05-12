@@ -81,4 +81,21 @@
 <script setup lang="ts">
 import WinRateChart from '~/components/charts/WinRateChart.vue';
 import AverageScoreChart from '~/components/charts/AverageScoreChart.vue';
+import { API_ENDPOINTS } from '~/constants/api';
+
+// ダッシュボードデータの取得
+const fetchDashboardData = async () => {
+	try {
+		const response = await fetch(API_ENDPOINTS.DASHBOARD.GET_SUMMARY);
+		const data = await response.json();
+
+		console.log('ダッシュボードデータ:', data);
+		return data;
+	} catch (error) {
+		console.error('ダッシュボードデータの取得に失敗:', error);
+		throw error;
+	}
+};
+
+fetchDashboardData();
 </script>
