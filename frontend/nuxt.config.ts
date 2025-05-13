@@ -7,5 +7,11 @@ export default defineNuxtConfig({
 	css: ['~/assets/css/main.css'],
 	vite: {
 		plugins: [tailwindcss()],
+		optimizeDeps: {
+			include: ['chart.js', '@kurkle/color'],
+		},
+	},
+	build: {
+		transpile: ['chart.js', '@kurkle/color'],
 	},
 });
