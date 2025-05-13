@@ -31,4 +31,8 @@ export const API_ENDPOINTS = {
 		DELETE: (evolutionId: string) =>
 			`${BASE_URL}/api/evolutions/${evolutionId}`,
 	},
+	DASHBOARD: {
+		// ダッシュボードの集計データ取得
+		GET_SUMMARY: `${BASE_URL}/api/dashboard`,
+	},
 } as const;
