@@ -8,10 +8,10 @@ export default defineNuxtConfig({
 	vite: {
 		plugins: [tailwindcss()],
 		optimizeDeps: {
-			include: ['chart.js', '@kurkle/color'],
+			include: ['chart.js', '@kurkle/color', 'vue-toastification'],
 		},
 	},
 	build: {
-		transpile: ['chart.js', '@kurkle/color'],
+		transpile: ['chart.js', '@kurkle/color', 'vue-toastification'],
 	},
 });
