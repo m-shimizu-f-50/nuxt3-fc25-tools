@@ -1,36 +1,28 @@
 {
-  "name": "nuxt-app",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
-  },
-  "dependencies": {
-    "@headlessui/vue": "^1.7.23",
-    "@heroicons/vue": "^2.2.0",
-    "@iconify/vue": "^4.3.0",
-    "@tailwindcss/vite": "^4.0.3",
-    "@types/axios": "^0.9.36",
-    "@vuepic/vue-datepicker": "^11.0.1",
-    "axios": "^1.7.9",
-    "nuxt": "^3.15.4",
-    "tailwindcss": "^4.0.3",
-    "v-calendar": "^3.1.2",
-    "vee-validate": "^4.15.0",
-    "vue": "latest",
-    "vue-router": "latest",
-    "yup": "^1.6.1"
-  },
-  "devDependencies": {
-    "@types/jest": "^29.5.14",
-    "@vue/test-utils": "^2.4.6",
-    "@vue/vue3-jest": "^29.2.6",
-    "babel-jest": "^29.7.0",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.3.3"
-  }
+	"name": "nuxt-app",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "nuxt build",
+		"dev": "nuxt dev",
+		"generate": "nuxt generate",
+		"preview": "nuxt preview",
+		"postinstall": "nuxt prepare"
+	},
+	"dependencies": {
+		"@headlessui/vue": "^1.7.23",
+		"@heroicons/vue": "^2.2.0",
+		"@iconify/vue": "^4.3.0",
+		"@tailwindcss/vite": "^4.0.3",
+		"@types/axios": "^0.9.36",
+		"@vuepic/vue-datepicker": "^11.0.1",
+		"axios": "^1.7.9",
+		"nuxt": "^3.15.4",
+		"tailwindcss": "^4.0.3",
+		"v-calendar": "^3.1.2",
+		"vee-validate": "^4.15.0",
+		"vue": "latest",
+		"vue-router": "latest",
+		"yup": "^1.6.1"
+	}
 }
