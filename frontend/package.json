@@ -19,16 +19,19 @@
 		"@types/axios": "^0.9.36",
 		"@vuepic/vue-datepicker": "^11.0.1",
 		"axios": "^1.7.9",
+		"chart.js": "^4.4.9",
 		"nuxt": "^3.15.4",
 		"tailwindcss": "^4.0.3",
 		"v-calendar": "^3.1.2",
 		"vee-validate": "^4.15.0",
 		"vue": "latest",
+		"vue-chartjs": "^5.3.2",
 		"vue-router": "latest",
 		"yup": "^1.6.1"
 	},
 	"devDependencies": {
 		"@vitejs/plugin-vue": "^5.2.4",
+		"@vue/test-utils": "^2.4.6",
 		"jsdom": "^26.1.0",
 		"readdirp": "^4.1.2",
 		"vitest": "^3.1.3"
