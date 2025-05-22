@@ -6,15 +6,15 @@
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 			<div class="bg-white rounded-lg shadow p-6">
 				<h3 class="text-lg font-semibold mb-2">総試合数</h3>
-				<p class="text-3xl font-bold text-blue-600">150</p>
+				<p class="text-3xl font-bold text-blue-600">{{ dashboardData.totalMatches }}</p>
 			</div>
 			<div class="bg-white rounded-lg shadow p-6">
 				<h3 class="text-lg font-semibold mb-2">総プレイヤー数</h3>
-				<p class="text-3xl font-bold text-green-600">45</p>
+				<p class="text-3xl font-bold text-green-600">{{ dashboardData.totalPlayers }}</p></p>
 			</div>
 			<div class="bg-white rounded-lg shadow p-6">
 				<h3 class="text-lg font-semibold mb-2">平均得点</h3>
-				<p class="text-3xl font-bold text-purple-600">2.8</p>
+				<p class="text-3xl font-bold text-purple-600">{{ dashboardData.averageGoals }}</p>
 			</div>
 		</div>
 
@@ -82,6 +82,15 @@
 import WinRateChart from '~/components/charts/WinRateChart.vue';
 import AverageScoreChart from '~/components/charts/AverageScoreChart.vue';
 import { API_ENDPOINTS } from '~/constants/api';
+import { ref } from 'vue';
+
+interface DashboardData {
+	totalMatches: number;
+	totalPlayers: number;
+	totalGoals: string;
+	averageGoals: number;
+}
+const dashboardData = ref<DashboardData>();
 
 // ダッシュボードデータの取得
 const fetchDashboardData = async () => {
@@ -90,7 +99,12 @@ const fetchDashboardData = async () => {
 		const data = await response.json();
 
 		console.log('ダッシュボードデータ:', data);
-		return data;
+		dashboardData.value = {
+			totalMatches: data.totalMatches,
+			totalPlayers: data.totalPlayers,
+			totalGoals: data.totalGoals,
+			averageGoals: data.averageGoals,
+		};
 	} catch (error) {
 		console.error('ダッシュボードデータの取得に失敗:', error);
 		throw error;
