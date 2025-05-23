@@ -1,5 +1,5 @@
 <template>
-	<div class="container mx-auto px-4 py-8">
+	<div v-if="!isLoading" class="container mx-auto px-4 py-8">
 		<h1 class="text-3xl font-bold mb-8">ダッシュボード</h1>
 
 		<!-- 統計カード -->
@@ -91,6 +91,7 @@ interface DashboardData {
 	averageGoals: number;
 }
 const dashboardData = ref<DashboardData>();
+const isLoading = ref(true);
 
 // ダッシュボードデータの取得
 const fetchDashboardData = async () => {
@@ -109,6 +110,10 @@ const fetchDashboardData = async () => {
 		console.error('ダッシュボードデータの取得に失敗:', error);
 		throw error;
 	}
+	finally {
+		isLoading.value = false;
+	}
+
 };
 
 fetchDashboardData();
