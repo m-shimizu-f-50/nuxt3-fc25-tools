@@ -6,15 +6,21 @@
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 			<div class="bg-white rounded-lg shadow p-6">
 				<h3 class="text-lg font-semibold mb-2">総試合数</h3>
-				<p class="text-3xl font-bold text-blue-600">{{ dashboardData.totalMatches }}</p>
+				<p class="text-3xl font-bold text-blue-600">
+					{{ dashboardData.totalMatches }}
+				</p>
 			</div>
 			<div class="bg-white rounded-lg shadow p-6">
 				<h3 class="text-lg font-semibold mb-2">総プレイヤー数</h3>
-				<p class="text-3xl font-bold text-green-600">{{ dashboardData.totalPlayers }}</p></p>
+				<p class="text-3xl font-bold text-green-600">
+					{{ dashboardData.totalPlayers }}
+				</p>
 			</div>
 			<div class="bg-white rounded-lg shadow p-6">
 				<h3 class="text-lg font-semibold mb-2">平均得点</h3>
-				<p class="text-3xl font-bold text-purple-600">{{ dashboardData.averageGoals }}</p>
+				<p class="text-3xl font-bold text-purple-600">
+					{{ dashboardData.averageGoals }}
+				</p>
 			</div>
 		</div>
 
@@ -101,19 +107,17 @@ const fetchDashboardData = async () => {
 
 		console.log('ダッシュボードデータ:', data);
 		dashboardData.value = {
-			totalMatches: data.totalMatches,
-			totalPlayers: data.totalPlayers,
-			totalGoals: data.totalGoals,
-			averageGoals: data.averageGoals,
+			totalMatches: data.data.totalMatches,
+			totalPlayers: data.data.totalPlayers,
+			totalGoals: data.data.totalGoals,
+			averageGoals: data.data.averageGoals,
 		};
 	} catch (error) {
 		console.error('ダッシュボードデータの取得に失敗:', error);
 		throw error;
-	}
-	finally {
+	} finally {
 		isLoading.value = false;
 	}
-
 };
 
 fetchDashboardData();
