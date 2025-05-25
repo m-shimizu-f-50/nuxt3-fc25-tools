@@ -17,11 +17,6 @@ interface Player {
 	isStarter: boolean;
 }
 
-interface FormData {
-	startDate: Date | null;
-	players: Player[];
-}
-
 const router: Router = useRouter();
 const toast = useToast();
 
@@ -55,7 +50,7 @@ const validationSchema = yup.object({
 const { handleSubmit, errors, validateField } = useForm({
 	validationSchema,
 	initialValues: {
-		startDate: null,
+		startDate: today,
 		players: [
 			{ name: '', position: 'FW', team: '', isStarter: true },
 			{ name: '', position: 'FW', team: '', isStarter: true },
@@ -89,120 +84,6 @@ const { fields: players, push, remove } = useFieldArray<Player>('players');
 const startDateModel = computed({
 	get: () => startDate.value.value as unknown as Date | null, // 型変換
 	set: (value: Date | null) => (startDate.value.value = value),
-});
-
-const formData = ref<FormData>({
-	startDate: null,
-	players: [
-		{
-			name: '',
-			position: 'FW',
-			team: '',
-			isStarter: true,
-		},
-		{
-			name: '',
-			position: 'FW',
-			team: '',
-			isStarter: true,
-		},
-		{
-			name: '',
-			position: 'FW',
-			team: '',
-			isStarter: true,
-		},
-		{
-			name: '',
-			position: 'MF',
-			team: '',
-			isStarter: true,
-		},
-		{
-			name: '',
-			position: 'MF',
-			team: '',
-			isStarter: true,
-		},
-		{
-			name: '',
-			position: 'MF',
-			team: '',
-			isStarter: true,
-		},
-		{
-			name: '',
-			position: 'DF',
-			team: '',
-			isStarter: true,
-		},
-		{
-			name: '',
-			position: 'DF',
-			team: '',
-			isStarter: true,
-		},
-		{
-			name: '',
-			position: 'DF',
-			team: '',
-			isStarter: true,
-		},
-		{
-			name: '',
-			position: 'DF',
-			team: '',
-			isStarter: true,
-		},
-		{
-			name: '',
-			position: 'GK',
-			team: '',
-			isStarter: true,
-		},
-		{
-			name: '',
-			position: 'FW',
-			team: '',
-			isStarter: false,
-		},
-		{
-			name: '',
-			position: 'FW',
-			team: '',
-			isStarter: false,
-		},
-		{
-			name: '',
-			position: 'FW',
-			team: '',
-			isStarter: false,
-		},
-		{
-			name: '',
-			position: 'FW',
-			team: '',
-			isStarter: false,
-		},
-		{
-			name: '',
-			position: 'FW',
-			team: '',
-			isStarter: false,
-		},
-		{
-			name: '',
-			position: 'FW',
-			team: '',
-			isStarter: false,
-		},
-		{
-			name: '',
-			position: 'FW',
-			team: '',
-			isStarter: false,
-		},
-	],
 });
 
 // 選手追加
