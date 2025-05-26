@@ -12,6 +12,16 @@
 			</button>
 		</div>
 
+		<!-- 検索フィールド -->
+		<div class="mb-6">
+			<input
+				type="text"
+				v-model="searchQuery"
+				placeholder="選手名で検索..."
+				class="w-full md:w-96 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+			/>
+		</div>
+
 		<div class="bg-white rounded-lg shadow overflow-hidden">
 			<table class="min-w-full divide-y divide-gray-200">
 				<thead class="bg-gray-50">
@@ -39,7 +49,7 @@
 					</tr>
 				</thead>
 				<tbody class="bg-white divide-y divide-gray-200">
-					<tr v-for="player in evolutionPlayers" :key="player.id">
+					<tr v-for="player in filteredPlayers" :key="player.id">
 						<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
 							{{ player.name }}
 						</td>
@@ -131,8 +141,9 @@
 
 <script setup lang="ts">
 import { API_ENDPOINTS } from '~/constants/api';
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useToast } from 'vue-toastification';
+import { useDebounceFn } from '@vueuse/core';
 
 interface Player {
 	id: string;
@@ -159,6 +170,8 @@ interface Player {
 }
 
 const evolutionPlayers = ref<Player[]>([]);
+const searchQuery = ref('');
+const debouncedSearchQuery = ref('');
 const toast = useToast();
 
 // パンくずリスト
@@ -167,6 +180,26 @@ const breadcrumbItems = [
 		name: 'EVO選手一覧',
 	},
 ];
+
+// デバウンス処理
+const updateDebouncedQuery = useDebounceFn((value: string) => {
+	debouncedSearchQuery.value = value;
+}, 300);
+
+// 検索クエリの変更を監視
+watch(searchQuery, (newValue) => {
+	updateDebouncedQuery(newValue);
+});
+
+// 検索結果をフィルタリング
+const filteredPlayers = computed(() => {
+	if (!debouncedSearchQuery.value) return evolutionPlayers.value;
+	
+	const query = debouncedSearchQuery.value.toLowerCase();
+	return evolutionPlayers.value.filter(player => 
+		player.name.toLowerCase().includes(query)
+	);
+});
 
 // 大会一覧を取得する関数
 const fetchEvolutionPlayers = async () => {
