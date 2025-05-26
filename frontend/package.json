@@ -18,6 +18,7 @@
 		"@tailwindcss/vite": "^4.0.3",
 		"@types/axios": "^0.9.36",
 		"@vuepic/vue-datepicker": "^11.0.1",
+		"@vueuse/core": "^13.2.0",
 		"axios": "^1.7.9",
 		"chart.js": "^4.4.9",
 		"listhen": "^1.9.0",
