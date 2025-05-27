@@ -4,22 +4,42 @@
 		<Breadcrumb :items="breadcrumbItems" />
 		<div class="flex justify-between items-center mb-8">
 			<h1 class="text-3xl font-bold">エボリューション選手一覧</h1>
-			<button
-				@click="navigateTo('/evolutions/new')"
-				class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-			>
-				新規選手登録
-			</button>
 		</div>
 
-		<!-- 検索フィールド -->
-		<div class="mb-6">
+		<!-- 操作エリア -->
+		<div class="flex justify-between items-center mb-6 space-x-4">
+			<!-- 検索フィールド -->
 			<input
 				type="text"
 				v-model="searchQuery"
-				placeholder="選手名で検索..."
+				placeholder="選手名で検索"
 				class="w-full md:w-96 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
 			/>
+
+			<div class="flex space-x-4">
+				<!-- 並び替えセレクトボックス -->
+				<div class="flex items-center space-x-1">
+					<label class="text-sm font-medium text-gray-700"
+						>並び替え（OVR）：</label
+					>
+					<select
+						v-model="sortOrder"
+						@change="handleSortChange"
+						class="block w-40 rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 text-sm leading-6"
+					>
+						<option value="desc">高い順</option>
+						<option value="asc">低い順</option>
+					</select>
+				</div>
+
+				<!-- 新規登録ボタン -->
+				<button
+					@click="navigateTo('/evolutions/new')"
+					class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+				>
+					新規選手登録
+				</button>
+			</div>
 		</div>
 
 		<div class="bg-white rounded-lg shadow overflow-hidden">
@@ -172,6 +192,7 @@ interface Player {
 const evolutionPlayers = ref<Player[]>([]);
 const searchQuery = ref('');
 const debouncedSearchQuery = ref('');
+const sortOrder = ref<'desc' | 'asc'>('desc'); // 並び替えの順序を管理
 const toast = useToast();
 
 // パンくずリスト
@@ -194,9 +215,9 @@ watch(searchQuery, (newValue) => {
 // 検索結果をフィルタリング
 const filteredPlayers = computed(() => {
 	if (!debouncedSearchQuery.value) return evolutionPlayers.value;
-	
+
 	const query = debouncedSearchQuery.value.toLowerCase();
-	return evolutionPlayers.value.filter(player => 
+	return evolutionPlayers.value.filter((player) =>
 		player.name.toLowerCase().includes(query)
 	);
 });
@@ -213,6 +234,22 @@ const fetchEvolutionPlayers = async () => {
 };
 
 fetchEvolutionPlayers();
+
+// 並び替えの順序を変更する関数
+const handleSortChange = (event: Event) => {
+	const target = event.target as HTMLSelectElement;
+	sortOrder.value = target.value as 'desc' | 'asc';
+	sortEvolutionPlayers();
+};
+
+// エボリューション一覧を並び替える関数
+const sortEvolutionPlayers = () => {
+	evolutionPlayers.value.sort((a, b) => {
+		const dateA = new Date(a.stats.overall).getTime();
+		const dateB = new Date(b.stats.overall).getTime();
+		return sortOrder.value === 'desc' ? dateB - dateA : dateA - dateB;
+	});
+};
 
 const onDeletePlayer = async (id: string) => {
 	if (confirm('本当に削除しますか？')) {
