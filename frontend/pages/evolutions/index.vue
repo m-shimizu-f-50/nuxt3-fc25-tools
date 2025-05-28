@@ -228,6 +228,7 @@ const fetchEvolutionPlayers = async () => {
 		const response = await fetch(API_ENDPOINTS.EVOLUTIONS.LIST);
 		const data = await response.json();
 		evolutionPlayers.value = data;
+		sortEvolutionPlayers();
 	} catch (error) {
 		console.error('エヴォリューション一覧一覧取得エラー:', error);
 	}
@@ -245,8 +246,8 @@ const handleSortChange = (event: Event) => {
 // エボリューション一覧を並び替える関数
 const sortEvolutionPlayers = () => {
 	evolutionPlayers.value.sort((a, b) => {
-		const dateA = new Date(a.stats.overall).getTime();
-		const dateB = new Date(b.stats.overall).getTime();
+		const dateA = new Date(a.latestEvolution.overall).getTime();
+		const dateB = new Date(b.latestEvolution.overall).getTime();
 		return sortOrder.value === 'desc' ? dateB - dateA : dateA - dateB;
 	});
 };
