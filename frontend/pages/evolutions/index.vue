@@ -13,7 +13,7 @@
 				type="text"
 				v-model="searchQuery"
 				placeholder="選手名で検索"
-				class="w-full md:w-96 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+				class="w-full md:w-96 px-4 py-2 border bg-white border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
 			/>
 
 			<div class="flex space-x-4">
@@ -25,7 +25,7 @@
 					<select
 						v-model="sortOrder"
 						@change="handleSortChange"
-						class="block w-40 rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 text-sm leading-6"
+						class="block w-40 rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 bg-white ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 text-sm leading-6"
 					>
 						<option value="desc">高い順</option>
 						<option value="asc">低い順</option>
