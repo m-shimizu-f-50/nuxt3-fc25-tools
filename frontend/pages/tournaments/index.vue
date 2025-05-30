@@ -176,7 +176,7 @@ const navigateToDetail = (tournamentId: number) => {
 					<select
 						v-model="sortOrder"
 						@change="handleSortChange"
-						class="block w-40 rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 text-sm leading-6"
+						class="block w-40 rounded-md border-0 py-2 pl-2 pr-10 bg-white text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 text-sm leading-6"
 					>
 						<option value="desc">新しい順</option>
 						<option value="asc">古い順</option>
