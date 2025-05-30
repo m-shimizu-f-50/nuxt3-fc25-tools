@@ -25,7 +25,7 @@
 					<select
 						v-model="sortOrder"
 						@change="handleSortChange"
-						class="block w-40 rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 bg-white ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 text-sm leading-6"
+						class="block w-40 rounded-md border-0 py-2 pl-2 pr-10 text-gray-900 bg-white ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 text-sm leading-6"
 					>
 						<option value="desc">高い順</option>
 						<option value="asc">低い順</option>
