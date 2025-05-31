@@ -15,7 +15,7 @@
 				<div class="w-full lg:w-5/12">
 					<!-- 基本情報カード -->
 					<div
-						class="bg-white rounded-lg shadow-lg p-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-6rem)]"
+						class="bg-white rounded-lg shadow-lg p-6 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)]"
 					>
 						<div class="gap-6">
 							<!-- 基本情報セクション -->
