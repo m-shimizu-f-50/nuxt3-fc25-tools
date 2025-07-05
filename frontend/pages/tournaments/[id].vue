@@ -116,27 +116,38 @@ const handleUpdate = async () => {
 			return;
 		}
 
-		const response = await axios.put(
+		const response = await fetch(
 			API_ENDPOINTS.TOURNAMENTS.UPDATE(route.params.id as string),
 			{
-				startDate: formattedStartDate,
-				comment: editableTournament.value.comment,
-				wins: editableTournament.value.wins,
-				losses: editableTournament.value.losses,
-				mvpPlayerId: editableTournament.value.mvpPlayerId,
-				players: displayPlayers.value.map((player) => ({
-					playerId: player.playerId,
-					playerName: player.playerName,
-					position: player.position,
-					team: player.team,
-					isStarter: player.isStarter,
-					totalGoals: player.totalGoals,
-					totalAssists: player.totalAssists,
-				})),
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					startDate: formattedStartDate,
+					comment: editableTournament.value.comment,
+					wins: editableTournament.value.wins,
+					losses: editableTournament.value.losses,
+					mvpPlayerId: editableTournament.value.mvpPlayerId,
+					players: displayPlayers.value.map((player) => ({
+						playerId: player.playerId,
+						playerName: player.playerName,
+						position: player.position,
+						team: player.team,
+						isStarter: player.isStarter,
+						totalGoals: player.totalGoals,
+						totalAssists: player.totalAssists,
+					})),
+				}),
 			}
 		);
 
-		tournament.value = response.data;
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const data = await response.json();
+		tournament.value = data;
 		if (tournament.value?.players) {
 			displayPlayers.value = tournament.value.players;
 		}

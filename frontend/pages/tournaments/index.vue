@@ -74,7 +74,17 @@ const handleDeleteTournament = async (tournamentId: number) => {
 	}
 
 	try {
-		await axios.delete(API_ENDPOINTS.TOURNAMENTS.DELETE(String(tournamentId)));
+		const response = await fetch(
+			API_ENDPOINTS.TOURNAMENTS.DELETE(String(tournamentId)),
+			{
+				method: 'DELETE',
+			}
+		);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
 		toast.success('大会を削除しました');
 		// 削除成功後、該当の大会を配列から削除(フロント側でも削除)
 		tournaments.value = tournaments.value.filter(
