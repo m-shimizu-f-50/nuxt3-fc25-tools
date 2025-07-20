@@ -30,6 +30,9 @@ export const API_ENDPOINTS = {
 		// エボリューションの削除
 		DELETE: (evolutionId: string) =>
 			`${BASE_URL}/api/evolutions/${evolutionId}`,
+		// エボリューション詳細URLの保存
+		UPDATE_URL: (playerId: string) =>
+			`${BASE_URL}/api/evolutions/players/${playerId}/url`,
 	},
 	DASHBOARD: {
 		// ダッシュボードの集計データ取得
