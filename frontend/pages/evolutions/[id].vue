@@ -46,6 +46,28 @@
 								</div>
 							</div>
 
+							<!-- エボリューション詳細 -->
+							<div class="flex gap-2 mb-4">
+								<input
+									v-model="player.evolutionDetailUrl"
+									type="text"
+									class="w-1/2 px-3 py-2 border rounded-md"
+									placeholder="エボリューション詳細URL"
+								/>
+								<button
+									@click="updateEvolutionDetailUrl"
+									class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+								>
+									設定
+								</button>
+								<button
+									@click="copyEvolutionDetailUrl"
+									class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+								>
+									リンクコピー
+								</button>
+							</div>
+
 							<!-- 能力値・レーダーチャートセクション -->
 							<div class="mt-4">
 								<!-- 数値表示 -->
@@ -416,6 +438,7 @@ interface Player {
 	id: string;
 	name: string;
 	position: string;
+	evolutionDetailUrl: string;
 	stats: Stats;
 	evolutions: Evolution[];
 }
@@ -439,6 +462,7 @@ const player = ref<Player>({
 	id: '',
 	name: '',
 	position: '',
+	evolutionDetailUrl: '',
 	stats: {
 		overall: 0,
 		pace: 0,
@@ -603,6 +627,7 @@ const fetchPlayerData = async () => {
 			id: playerData.id,
 			name: playerData.name,
 			position: playerData.position,
+			evolutionDetailUrl: playerData.evolutionDetailUrl,
 			stats: {
 				overall: playerData.stats.overall,
 				pace: playerData.stats.pace,
@@ -718,6 +743,29 @@ const saveEvolution = async (index: number) => {
 		console.error('エボリューション保存エラー:', error);
 		toast.error('エボリューション選手の保存に失敗しました');
 	}
+};
+
+// エボリューション詳細URLを更新
+const updateEvolutionDetailUrl = async () => {
+	console.log('updateEvolutionDetailUrl', player.value.evolutionDetailUrl);
+
+	try {
+		await axios.put(API_ENDPOINTS.EVOLUTIONS.UPDATE_URL(player.value.id), {
+			evolutionDetailUrl: player.value.evolutionDetailUrl,
+		});
+
+		toast.success('エボリューション詳細URLを更新しました');
+	} catch (error: any) {
+		if (error.response?.status === 400) {
+			toast.error('有効なURL形式ではありません');
+		}
+	}
+};
+
+// エボリューション詳細URLをコピー
+const copyEvolutionDetailUrl = () => {
+	navigator.clipboard.writeText(player.value.evolutionDetailUrl);
+	toast.success('エボリューション詳細URLをコピーしました');
 };
 
 // エボリューションキャンセル
