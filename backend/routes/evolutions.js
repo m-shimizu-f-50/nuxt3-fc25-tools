@@ -206,7 +206,8 @@ router.get('/player/:id', async (req, res) => {
             passing,
             dribbling,
             defending,
-            physical
+            physical,
+						evolution_detail_url
         FROM evolution_players 
         WHERE id = ?`,
 		[id],
@@ -258,6 +259,7 @@ router.get('/player/:id', async (req, res) => {
 							id: player.id,
 							name: player.name,
 							position: player.position,
+							evolutionDetailUrl: player.evolution_detail_url,
 							stats: {
 								overall: player.overall,
 								pace: player.pace,
@@ -293,7 +295,7 @@ router.get('/player/:id', async (req, res) => {
 // エボリューション選手の更新
 router.put('/:id', async (req, res) => {
 	const { id } = req.params;
-	const { name, position, stats } = req.body;
+	const { name, position, stats, evolutionDetailUrl } = req.body;
 
 	try {
 		// トランザクション開始
@@ -324,6 +326,7 @@ router.put('/:id', async (req, res) => {
                 dribbling = ?, 
                 defending = ?, 
                 physical = ?,
+								evolution_detail_url = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         `;
@@ -331,6 +334,7 @@ router.put('/:id', async (req, res) => {
 		await db.query(updatePlayerQuery, [
 			name,
 			position,
+			evolutionDetailUrl,
 			stats.overall,
 			stats.pace,
 			stats.shooting,
@@ -592,4 +596,72 @@ router.put('/players/:id/history', (req, res) => {
 	);
 });
 
+// エボリューション詳細URLの更新
+router.put('/players/:id/url', (req, res) => {
+	const { id } = req.params;
+	const { evolutionDetailUrl } = req.body;
+
+	// バリデーション
+	if (!evolutionDetailUrl) {
+		return res.status(400).json({
+			message: 'エボリューション詳細URLが指定されていません',
+		});
+	}
+
+	// URLの形式チェック（簡易的なバリデーション）
+	const urlPattern = /^https?:\/\/.+|^\/.+$/;
+	if (!urlPattern.test(evolutionDetailUrl)) {
+		return res.status(400).json({
+			message: '有効なURL形式ではありません',
+		});
+	}
+
+	// エボリューション詳細URLを更新するSQLクエリ
+	const updateUrlQuery = `
+		UPDATE evolution_players SET 
+				evolution_detail_url = ?,
+				updated_at = CURRENT_TIMESTAMP
+		WHERE id = ?
+	`;
+
+	db.query(updateUrlQuery, [evolutionDetailUrl, id], (err, results) => {
+		if (err) {
+			console.error('エボリューション詳細URL更新エラー:', err);
+			return res.status(500).json({
+				message: 'エボリューション詳細URLの更新に失敗しました',
+				error: err.message,
+			});
+		}
+
+		if (results.affectedRows === 0) {
+			return res.status(404).json({
+				message: 'エボリューション選手が見つかりません',
+			});
+		}
+
+		// 更新後のデータを取得
+		db.query(
+			'SELECT id, name, evolution_detail_url FROM evolution_players WHERE id = ?',
+			[id],
+			(err, results) => {
+				if (err) {
+					console.error('更新データ取得エラー:', err);
+					return res.status(500).json({
+						message: '更新データの取得に失敗しました',
+						error: err.message,
+					});
+				}
+
+				res.json({
+					message: 'エボリューション詳細URLを更新しました',
+					data: {
+						id: results[0].id,
+						name: results[0].name,
+						evolutionDetailUrl: results[0].evolution_detail_url,
+					},
+				});
+			}
+		);
+	});
+});
 module.exports = router;
