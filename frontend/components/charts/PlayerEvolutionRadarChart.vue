@@ -1,5 +1,5 @@
 <template>
-	<div class="flex justify-center items-center w-full h-90">
+	<div class="flex justify-center items-center w-full h-75">
 		<Radar :data="chartData" :options="chartOptions" />
 	</div>
 </template>
