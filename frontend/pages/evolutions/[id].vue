@@ -15,22 +15,22 @@
 				<div class="w-full lg:w-5/12">
 					<!-- 基本情報カード -->
 					<div
-						class="bg-white rounded-lg shadow-lg p-6 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)]"
+						class="bg-white rounded-lg shadow-lg p-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)]"
 					>
 						<div class="gap-6">
 							<!-- 基本情報セクション -->
 							<div class="">
 								<!-- <h2 class="text-xl font-semibold mb-2">基本情報</h2> -->
-								<div class="flex space-x-4">
+								<div class="flex space-x-4 mb-2">
 									<div>
 										<dt class="text-sm font-medium text-gray-500">選手名</dt>
-										<dd class="mt-1 text-lg font-semibold text-gray-900">
+										<dd class="mt-1 font-semibold text-gray-900">
 											{{ player.name }}
 										</dd>
 										<dt class="text-sm font-medium text-gray-500">
 											ポジション
 										</dt>
-										<dd class="mt-1 text-lg font-semibold text-gray-900">
+										<dd class="mt-1 font-semibold text-gray-900">
 											{{ player.position }}
 										</dd>
 									</div>
@@ -39,7 +39,7 @@
 										class="m-5 flex flex-col items-center py-2 px-16 bg-gray-50 rounded-lg"
 									>
 										<span class="text-xs font-medium text-gray-500">OVR</span>
-										<span class="text-xl font-bold text-gray-900">{{
+										<span class="font-bold text-gray-900">{{
 											displayValues.overall
 										}}</span>
 									</div>
@@ -56,13 +56,13 @@
 								/>
 								<button
 									@click="updateEvolutionDetailUrl"
-									class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+									class="px-2 py-1 bg-blue-600 text-xs text-white rounded-md hover:bg-blue-700"
 								>
 									設定
 								</button>
 								<button
 									@click="copyEvolutionDetailUrl"
-									class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+									class="px-2 py-1 bg-gray-600 text-xs text-white rounded-md hover:bg-gray-700"
 								>
 									リンクコピー
 								</button>
@@ -73,50 +73,50 @@
 								<!-- 数値表示 -->
 								<div class="grid grid-cols-3 gap-2 mb-4">
 									<div
-										class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+										class="flex flex-col items-center p-1 bg-gray-50 rounded-lg"
 									>
 										<span class="text-xs font-medium text-gray-500">PAC</span>
-										<span class="text-xl font-bold text-gray-900">{{
+										<span class="font-bold text-gray-900">{{
 											displayValues.pace
 										}}</span>
 									</div>
 									<div
-										class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+										class="flex flex-col items-center p-1 bg-gray-50 rounded-lg"
 									>
 										<span class="text-xs font-medium text-gray-500">SHO</span>
-										<span class="text-xl font-bold text-gray-900">{{
+										<span class="font-bold text-gray-900">{{
 											displayValues.shooting
 										}}</span>
 									</div>
 									<div
-										class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+										class="flex flex-col items-center p-1 bg-gray-50 rounded-lg"
 									>
 										<span class="text-xs font-medium text-gray-500">PAS</span>
-										<span class="text-xl font-bold text-gray-900">{{
+										<span class="font-bold text-gray-900">{{
 											displayValues.passing
 										}}</span>
 									</div>
 									<div
-										class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+										class="flex flex-col items-center p-1 bg-gray-50 rounded-lg"
 									>
 										<span class="text-xs font-medium text-gray-500">DRI</span>
-										<span class="text-xl font-bold text-gray-900">{{
+										<span class="font-bold text-gray-900">{{
 											displayValues.dribbling
 										}}</span>
 									</div>
 									<div
-										class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+										class="flex flex-col items-center p-1 bg-gray-50 rounded-lg"
 									>
 										<span class="text-xs font-medium text-gray-500">DEF</span>
-										<span class="text-xl font-bold text-gray-900">{{
+										<span class="font-bold text-gray-900">{{
 											displayValues.defending
 										}}</span>
 									</div>
 									<div
-										class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+										class="flex flex-col items-center p-1 bg-gray-50 rounded-lg"
 									>
 										<span class="text-xs font-medium text-gray-500">PHY</span>
-										<span class="text-xl font-bold text-gray-900">{{
+										<span class="font-bold text-gray-900">{{
 											displayValues.physical
 										}}</span>
 									</div>
@@ -131,12 +131,12 @@
 
 				<div class="w-full lg:w-7/12">
 					<!-- エボリューション履歴 -->
-					<div class="space-y-6">
+					<div class="space-y-4">
 						<div class="flex justify-between items-center">
 							<h2 class="text-xl font-semibold">エボリューション履歴</h2>
 							<button
 								@click="addNewEvolution"
-								class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center space-x-2"
+								class="px-4 py-2 bg-blue-600 text-xs text-white rounded-md hover:bg-blue-700 flex items-center space-x-2"
 							>
 								<svg
 									class="w-5 h-5"
@@ -173,13 +173,13 @@
 												: '#ffffff',
 									}"
 								>
-									<div class="flex justify-between items-start mb-4">
+									<div class="flex justify-between items-start">
 										<div class="flex-1">
 											<template v-if="evolution.isEditing">
 												<input
 													v-model="evolution.evolutionName"
 													type="text"
-													class="w-full px-3 py-2 border rounded-md mb-4"
+													class="w-full px-3 py-2 border rounded-md mb-2"
 													placeholder="エボリューション名"
 												/>
 												<div class="grid grid-cols-3 md:grid-cols-7 gap-3">
@@ -285,13 +285,13 @@
 												<div class="flex justify-end space-x-2 mt-4">
 													<button
 														@click="saveEvolution(index)"
-														class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+														class="px-4 py-2 bg-green-600 text-xs text-white rounded-md hover:bg-green-700"
 													>
 														保存
 													</button>
 													<button
 														@click="cancelEvolution(index)"
-														class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+														class="px-4 py-2 bg-red-600 text-xs text-white rounded-md hover:bg-red-700"
 													>
 														キャンセル
 													</button>
@@ -367,7 +367,7 @@
 														evolution.evolutionName !== '初期状態'
 													"
 													@click="editEvolution(index)"
-													class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+													class="px-3 py-2 bg-blue-600 text-xs text-white rounded-md hover:bg-blue-700"
 												>
 													編集
 												</button>
