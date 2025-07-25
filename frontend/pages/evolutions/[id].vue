@@ -52,19 +52,32 @@
 									v-model="player.evolutionDetailUrl"
 									type="text"
 									class="w-1/2 px-3 py-2 border rounded-md"
+									:class="{
+										'bg-gray-100 text-gray-500 border-gray-300': isEditUrl,
+										'bg-white text-gray-900 border-gray-400': !isEditUrl,
+									}"
 									placeholder="エボリューション詳細URL"
+									:disabled="isEditUrl"
 								/>
 								<button
+									v-if="!isEditUrl"
 									@click="updateEvolutionDetailUrl"
 									class="px-2 py-1 bg-blue-600 text-xs text-white rounded-md hover:bg-blue-700"
 								>
 									設定
 								</button>
 								<button
+									v-if="isEditUrl"
 									@click="copyEvolutionDetailUrl"
-									class="px-2 py-1 bg-gray-600 text-xs text-white rounded-md hover:bg-gray-700"
+									class="px-2 py-1 bg-blue-600 text-xs text-white rounded-md hover:bg-blue-700"
 								>
 									リンクコピー
+								</button>
+								<button
+									@click="toggleEditUrl"
+									class="px-2 py-1 bg-gray-600 text-xs text-white rounded-md hover:bg-gray-700"
+								>
+									{{ isEditUrl ? '編集' : 'キャンセル' }}
 								</button>
 							</div>
 
@@ -406,6 +419,7 @@ import PlayerEvolutionRadarChart from '~/components/charts/PlayerEvolutionRadarC
 import Breadcrumb from '~/components/Breadcrumb.vue';
 import axios from 'axios';
 import { useToast } from 'vue-toastification';
+import { useToggle } from '@vueuse/core';
 
 const route = useRoute();
 const toast = useToast();
@@ -456,6 +470,9 @@ const breadcrumbItems = [
 
 // ローディング状態
 const isLoading = ref<boolean>(true);
+// エボリューションURLの編集状態
+const isEditUrl = ref<boolean>(true);
+const oldEvolutionDetailUrl = ref<string>('');
 
 // 選手データの初期値
 const player = ref<Player>({
@@ -499,6 +516,18 @@ const displayValues = ref<Stats>({
 	defending: 0,
 	physical: 0,
 });
+
+// エボリューションURLの編集トグル
+const toggleEditUrl = () => {
+	isEditUrl.value = !isEditUrl.value;
+	if (isEditUrl.value) {
+		// キャンセルされた場合、元のURLに戻す
+		player.value.evolutionDetailUrl = oldEvolutionDetailUrl.value;
+	} else {
+		// 編集モードに入るときは、現在のURLを保存
+		oldEvolutionDetailUrl.value = player.value.evolutionDetailUrl;
+	}
+};
 
 // アニメーション更新関数
 const isAnimating = ref(false);
@@ -755,6 +784,7 @@ const updateEvolutionDetailUrl = async () => {
 		});
 
 		toast.success('エボリューション詳細URLを更新しました');
+		isEditUrl.value = true; // 編集モードを終了
 	} catch (error: any) {
 		if (error.response?.status === 400) {
 			toast.error('有効なURL形式ではありません');
